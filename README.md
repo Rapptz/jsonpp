@@ -3,6 +3,8 @@
 jsonpp is a header-only JSON parser and writer that is currently in development. It is a semi-strict
 parser that throws exceptions for errors.
 
+jsonpp is licensed with the MIT license.
+
 ## Features
 
 - Easy to use with an easy to use API.
@@ -68,3 +70,4 @@ Output:
 - The parser is not destructive.
 - The parser is recursive descent.
 - `int` and `double` types are aliased to be the same.
+- Some errors are not caught but effort has been made to catch a lot of errors.

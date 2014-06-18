@@ -48,7 +48,7 @@ private:
 
     const char* parse_value(const char* str, value& v) {
         const char* s = skip_white_space(str);
-        if(!s) {
+        if(*s == '\0') {
             throw parser_error("unexpected EOF found", line, column);
         }
 
@@ -79,18 +79,12 @@ private:
             }
         }
 
-        static const std::string accepted_characters = ",[]{}:";
-        s = skip_white_space(s);
-        if(*s && accepted_characters.find(*s) == std::string::npos) {
-            throw parser_error("unexpected token found", line, column);
-        }
-
-        return s;
+        return skip_white_space(s);
     }
 
     const char* parse_null(const char* str, value& v) {
         static const char null_str[] = "null";
-        if(!str) {
+        if(*str == '\0') {
             throw parser_error("expected null, received EOF instead", line, column);
         }
 
@@ -107,7 +101,7 @@ private:
     const char* parse_number(const char* str, value& v) {
         static const std::string lookup = "0123456789eE+-.";
         const char* begin = str;
-        if(!begin) {
+        if(*begin == '\0') {
             throw parser_error("expected number, received EOF instead", line, column);
         }
 
@@ -132,7 +126,7 @@ private:
     template<typename Value>
     const char* parse_string(const char* str, Value& v) {
         const char* end = str + 1;
-        if(!end) {
+        if(*end == '\0') {
             throw parser_error("expected string, received EOF instead", line, column);
         }
 
@@ -140,7 +134,7 @@ private:
             ++end;
         }
 
-        if(!end) {
+        if(*end == '\0') {
             throw parser_error("unescaped string sequence found", line, column);
         }
 
@@ -152,7 +146,7 @@ private:
     }
 
     const char* parse_bool(const char* str, value& v) {
-        if(!str) {
+        if(*str == '\0') {
             throw parser_error("expected boolean, received EOF instead", line, column);
         }
 
@@ -174,6 +168,11 @@ private:
         const char *s = str + 1;
         array arr;
         value elem;
+        s = skip_white_space(s);
+
+        if(*s == '\0') {
+            throw parser_error("expected value, received EOF instead", line, column);
+        }
 
         while (*s && *s != ']') {
             s = parse_value(s, elem);
@@ -184,6 +183,12 @@ private:
             }
             else if(*s == ',') {
                 ++s;
+                // skip whitespace
+                s = skip_white_space(s);
+                // handle missing input
+                if(*s && *s == ']') {
+                    throw parser_error("extraneous comma spotted", line, column);
+                }
             }
 
             arr.push_back(elem);
@@ -197,6 +202,12 @@ private:
         object obj;
         std::string key;
         value elem;
+
+        s = skip_white_space(s);
+
+        if(*s == '\0') {
+            throw parser_error("expected string key, received EOF instead", line, column);
+        }
 
         while(*s) {
             s = skip_white_space(s);
@@ -246,7 +257,10 @@ public:
     void parse(const std::string& str, value& v) {
         line = 1;
         column = 1;
-        parse_value(str.c_str(), v);
+        auto s = parse_value(str.c_str(), v);
+        if(*s != '\0') {
+            throw parser_error("unexpected token found", line, column);
+        }
     }
 
     template<typename IStream, DisableIf<is_string<IStream>> = 0>
