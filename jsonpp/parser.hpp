@@ -36,12 +36,12 @@ private:
 
     const char* skip_white_space(const char* str) {
         while(*str && isspace(*str)) {
-            ++str;
-            ++column;
             if(*str == '\n') {
                 ++line;
                 column = 0;
             }
+            ++str;
+            ++column;
         }
         return str;
     }
