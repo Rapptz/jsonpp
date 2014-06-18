@@ -73,10 +73,19 @@ private:
             case '{':
                 s = parse_object(s, v);
                 break;
+            default:
+                throw parser_error("unexpected token found", line, column);
+                break;
             }
         }
 
-        return skip_white_space(s);
+        static const std::string accepted_characters = ",[]{}:";
+        s = skip_white_space(s);
+        if(*s && accepted_characters.find(*s) == std::string::npos) {
+            throw parser_error("unexpected token found", line, column);
+        }
+
+        return s;
     }
 
     const char* parse_null(const char* str, value& v) {
@@ -189,8 +198,14 @@ private:
         std::string key;
         value elem;
 
-        while(*s && *s != '}') {
+        while(*s) {
             s = skip_white_space(s);
+
+            // empty object
+            if(*s == '}') {
+                break;
+            }
+
             if(*s != '"') {
                 throw parser_error("expected string as key not found", line, column);
             }
@@ -208,7 +223,9 @@ private:
                     throw parser_error("missing comma", line, column);
                 }
             }
-            ++s;
+            else if(*s == ',') {
+                ++s;
+            }
             obj.emplace(key, elem);
         }
 
