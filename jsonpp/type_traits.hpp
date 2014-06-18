@@ -23,6 +23,7 @@
 #define JSON_TYPE_TRAITS_HPP
 
 #include <type_traits>
+#include <string>
 
 namespace json {
 inline namespace v1 {
