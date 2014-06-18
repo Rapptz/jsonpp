@@ -224,6 +224,8 @@ public:
     }
 
     void parse(const std::string& str, value& v) {
+        line = 1;
+        column = 1;
         parse_value(str.c_str(), v);
     }
 

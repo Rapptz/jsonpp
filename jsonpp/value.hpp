@@ -27,6 +27,8 @@
 #include <sstream>
 #include <map>
 #include <vector>
+#include <cassert>
+#include <memory>
 
 namespace json {
 inline namespace v1 {
@@ -191,27 +193,31 @@ public:
         storage_type = type::null;
     }
 
-    std::string to_string() const {
+    std::string to_string(unsigned precision = 6) const {
         switch(storage_type) {
         case type::null:
             return "null";
-        case type::number:
-            return std::to_string(storage.number);
+        case type::number: {
+            char buffer[328];
+            std::snprintf(buffer, 328, "%.*g", precision, storage.number);
+            return buffer;
+        }
         case type::boolean:
             return storage.boolean ? "true" : "false";
         case type::string:
             return '"' + *(storage.str) + '"';
         case type::array: {
             std::ostringstream ss;
+            ss.precision(precision);
             ss << "[";
             auto first = storage.arr->begin();
             auto last = storage.arr->end();
             if(first != last) {
-                ss << first->to_string();
+                ss << first->to_string(precision);
                 ++first;
             }
             while(first != last) {
-                ss << ", " << first->to_string();
+                ss << ", " << first->to_string(precision);
                 ++first;
             }
             ss << "]";
@@ -219,16 +225,17 @@ public:
         }
         case type::object: {
             std::ostringstream ss;
+            ss.precision(precision);
             ss << "{";
             auto begin = storage.obj->begin();
             auto end = storage.obj->end();
             if(begin != end) {
-                ss << '"' << begin->first << "\": " << begin->second.to_string();
+                ss << '"' << begin->first << "\": " << begin->second.to_string(precision);
                 ++begin;
             }
 
             while(begin != end) {
-                ss << ", \"" << begin->first << "\": " << begin->second.to_string();
+                ss << ", \"" << begin->first << "\": " << begin->second.to_string(precision);
                 ++begin;
             }
             ss << "}";
