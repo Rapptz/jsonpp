@@ -173,7 +173,10 @@ private:
                     throw parser_error("missing comma", line, column);
                 }
             }
-            ++s;
+            else if(*s == ',') {
+                ++s;
+            }
+
             arr.push_back(elem);
         }
         v = arr;
