@@ -70,4 +70,8 @@ Output:
 - The parser is not destructive.
 - The parser is recursive descent.
 - `int` and `double` types are aliased to be the same.
+- Forward slashes are not escaped.
+- String is expected to be in UTF-8.
+- `\uNNNN` literals are not tampered with because C++11 natively supports them.
+- Currently, no input validation is done on strings.
 - Some errors are not caught but effort has been made to catch a lot of errors.
