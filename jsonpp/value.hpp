@@ -217,7 +217,7 @@ public:
                 ++first;
             }
             while(first != last) {
-                ss << ", " << first->to_string(precision);
+                ss << ',' << first->to_string(precision);
                 ++first;
             }
             ss << "]";
@@ -230,12 +230,12 @@ public:
             auto begin = storage.obj->begin();
             auto end = storage.obj->end();
             if(begin != end) {
-                ss << '"' << begin->first << "\": " << begin->second.to_string(precision);
+                ss << '"' << begin->first << "\":" << begin->second.to_string(precision);
                 ++begin;
             }
 
             while(begin != end) {
-                ss << ", \"" << begin->first << "\": " << begin->second.to_string(precision);
+                ss << ",\"" << begin->first << "\":" << begin->second.to_string(precision);
                 ++begin;
             }
             ss << "}";

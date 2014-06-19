@@ -233,7 +233,7 @@ TEST_CASE("arrays", "[basic-arrays]") {
         REQUIRE(!v.is<std::string>());
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<json::object>());
-        REQUIRE(v.to_string(4) == "[null, \"hello\", 1.03e-009, \"wow\"]");
+        REQUIRE(v.to_string(4) == "[null,\"hello\",1.03e-009,\"wow\"]");
         auto&& arr = v.as<json::array>();
         REQUIRE(!arr.empty());
         REQUIRE(arr.size() == 4);
@@ -296,7 +296,7 @@ TEST_CASE("arrays", "[basic-arrays]") {
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
-        REQUIRE(v.to_string() == "[10, null, \"hello\", 1.23456]");
+        REQUIRE(v.to_string() == "[10,null,\"hello\",1.23456]");
 
         auto&& arr = v.as<json::array>();
         REQUIRE(!arr.empty());
@@ -436,7 +436,7 @@ TEST_CASE("objects", "[basic-objects]") {
         REQUIRE(!v.is<std::string>());
         REQUIRE(v.is<json::object>());
         REQUIRE(!v.is<bool>());
-        REQUIRE(v.to_string() == "{\"hello\": 10}");
+        REQUIRE(v.to_string() == "{\"hello\":10}");
 
         auto&& obj = v.as<json::object>();
         REQUIRE(!obj.empty());

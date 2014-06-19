@@ -7,7 +7,7 @@ jsonpp is licensed with the MIT license.
 
 ## Features
 
-- Easy to use with an easy to use API.
+- Easy to use with a simple API.
 - No special null, array, or object types.
     - `json::null` is a type alias to `std::nullptr_t`.
     - `json::array` is `std::vector<json::value>`.
@@ -59,7 +59,7 @@ int main() {
 
 Output:
 <pre>
-[null, "hello", 10]
+[null,"hello",10]
 </pre>
 
 ## Quirks and Specification
