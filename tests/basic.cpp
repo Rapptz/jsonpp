@@ -226,14 +226,14 @@ TEST_CASE("arrays", "[basic-arrays]") {
     }
 
     SECTION("regular array") {
-        REQUIRE_NOTHROW(p.parse("\t\n\n\t\n  [null, \"hello\", 10.3e-10, \"wow\"]\t\n\t", v));
+        REQUIRE_NOTHROW(p.parse("\t\n\n\t\n  [null, \"hello\", 10, \"wow\"]\t\n\t", v));
         REQUIRE(v.is<json::array>());
         REQUIRE(!v.is<double>());
         REQUIRE(!v.is<bool>());
         REQUIRE(!v.is<std::string>());
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<json::object>());
-        REQUIRE(v.to_string(4) == "[null,\"hello\",1.03e-009,\"wow\"]");
+        REQUIRE(v.to_string() == "[null,\"hello\",10,\"wow\"]");
         auto&& arr = v.as<json::array>();
         REQUIRE(!arr.empty());
         REQUIRE(arr.size() == 4);
