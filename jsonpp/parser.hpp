@@ -130,8 +130,16 @@ private:
             throw parser_error("expected string, received EOF instead", line, column);
         }
 
-        while(*end && *end != '"') {
-            ++end;
+        while(*end) {
+            if(*end == '\\' && *(end + 1) != '\0' && *(end + 1) == '"') {
+                end = end + 2;
+            }
+            else if(*end == '"') {
+                break;
+            }
+            else {
+                ++end;
+            }
         }
 
         if(*end == '\0') {

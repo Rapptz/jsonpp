@@ -114,6 +114,35 @@ TEST_CASE("strings", "[basic-strings]") {
         REQUIRE(str.empty());
     }
 
+    SECTION("escaped strings") {
+        REQUIRE_NOTHROW(p.parse(R"("\"")", v));
+        REQUIRE(!v.is<json::array>());
+        REQUIRE(!v.is<double>());
+        REQUIRE(v.is<std::string>());
+        REQUIRE(v.is<const char*>());
+        REQUIRE(!v.is<json::null>());
+        REQUIRE(!v.is<json::object>());
+        REQUIRE(v.to_string() == R"("\"")");
+
+        auto&& str1 = v.as<std::string>();
+        REQUIRE(str1.size() == 2);
+        REQUIRE(str1.back() == '"');
+        REQUIRE(str1.front() == '\\');
+
+        REQUIRE_NOTHROW(p.parse(R"("\t\n\v\b\"\u2000\u1234")", v));
+        REQUIRE(!v.is<json::array>());
+        REQUIRE(!v.is<double>());
+        REQUIRE(v.is<std::string>());
+        REQUIRE(v.is<const char*>());
+        REQUIRE(!v.is<json::null>());
+        REQUIRE(!v.is<json::object>());
+        REQUIRE(v.to_string() == R"("\t\n\v\b\"\u2000\u1234")");
+
+        auto&& str2 = v.as<std::string>();
+        REQUIRE(str2.size() == 22);
+        REQUIRE(str2 == R"(\t\n\v\b\"\u2000\u1234)");
+    }
+
     SECTION("regular string") {
         REQUIRE_NOTHROW(p.parse("\t\n\n\n\t\n\n   \"hello world\"\n\t\n\n", v));
         REQUIRE(!v.is<json::array>());
