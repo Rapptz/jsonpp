@@ -29,262 +29,256 @@
 
 namespace json {
 inline namespace v1 {
-struct parser {
-private:
-    unsigned line = 1;
-    unsigned column = 1;
+namespace detail {
+struct parser_state {
+    unsigned line;
+    unsigned column;
+    const char* str;
+};
 
-    const char* skip_white_space(const char* str) {
-        while(*str && isspace(*str)) {
-            if(*str == '\n') {
-                ++line;
-                column = 0;
-            }
-            ++str;
-            ++column;
+inline void skip_white_space(parser_state& ps) {
+    while(*ps.str && isspace(*ps.str)) {
+        if(*ps.str == '\n') {
+            ++ps.line;
+            ps.column = 0;
         }
-        return str;
+        ++ps.str;
+        ++ps.column;
+    }
+}
+
+inline void parse_value(parser_state& ps, value& v);
+
+inline void parse_null(parser_state& ps, value& v) {
+    static const char null_str[] = "null";
+    if(*ps.str == '\0') {
+        throw parser_error("expected null, received EOF instead", ps.line, ps.column);
     }
 
-    const char* parse_value(const char* str, value& v) {
-        const char* s = skip_white_space(str);
-        if(*s == '\0') {
-            throw parser_error("unexpected EOF found", line, column);
-        }
+    if(std::strncmp(ps.str, null_str, sizeof(null_str) - 1) != 0) {
+        throw parser_error("expected null not found", ps.line, ps.column);
+    }
 
-        if(isdigit(*s) || *s == '+' || *s == '-') {
-            s = parse_number(s, v);
+    v = nullptr;
+    ps.str = ps.str + sizeof(null_str) - 1;
+    ps.column += sizeof(null_str);
+}
+
+inline void parse_number(parser_state& ps, value& v) {
+    static const std::string lookup = "0123456789eE+-.";
+    const char* begin = ps.str;
+    if(*begin == '\0') {
+        throw parser_error("expected number, received EOF instead", ps.line, ps.column);
+    }
+
+    while(lookup.find(*ps.str) != std::string::npos) {
+        ++ps.str;
+    }
+
+    double val = 0.0;
+    try {
+        std::string temp(begin, ps.str);
+        val = std::stod(temp);
+        ps.column += temp.size() + 1;
+    }
+    catch(const std::exception& e) {
+        throw parser_error("number could not be parsed properly", ps.line, ps.column);
+    }
+
+    v = val;
+}
+
+template<typename Value>
+inline void parse_string(parser_state& ps, Value& v) {
+    const char* end = ps.str + 1;
+    if(*end == '\0') {
+        throw parser_error("expected string, received EOF instead", ps.line, ps.column);
+    }
+
+    while(*end) {
+        if(*end == '\\' && *(end + 1) != '\0' && *(end + 1) == '"') {
+            end = end + 2;
+        }
+        else if(*end == '"') {
+            break;
         }
         else {
-            switch(*s) {
-            case 'n':
-                s = parse_null(s, v);
-                break;
-            case '"':
-                s = parse_string(s, v);
-                break;
-            case 't':
-            case 'f':
-                s = parse_bool(s, v);
-                break;
-            case '[':
-                s = parse_array(s, v);
-                break;
-            case '{':
-                s = parse_object(s, v);
-                break;
-            default:
-                throw parser_error("unexpected token found", line, column);
-                break;
-            }
+            ++end;
         }
-
-        return skip_white_space(s);
     }
 
-    const char* parse_null(const char* str, value& v) {
-        static const char null_str[] = "null";
-        if(*str == '\0') {
-            throw parser_error("expected null, received EOF instead", line, column);
-        }
-
-        if(std::strncmp(str, null_str, sizeof(null_str) - 1) != 0) {
-            throw parser_error("expected null not found", line, column);
-        }
-
-        v = nullptr;
-        str = str + sizeof(null_str) - 1;
-        column += sizeof(null_str);
-        return str;
+    if(*end == '\0') {
+        throw parser_error("unescaped string sequence found", ps.line, ps.column);
     }
 
-    const char* parse_number(const char* str, value& v) {
-        static const std::string lookup = "0123456789eE+-.";
-        const char* begin = str;
-        if(*begin == '\0') {
-            throw parser_error("expected number, received EOF instead", line, column);
-        }
+    auto&& temp = std::string(ps.str + 1, end);
+    ps.column += temp.size() + 1;
+    v = temp;
+    ++end;
+    ps.str = end;
+}
 
-        while(lookup.find(*str) != std::string::npos) {
-            ++str;
-        }
-
-        double val = 0.0;
-        try {
-            std::string temp(begin, str);
-            val = std::stod(temp);
-            column += temp.size() + 1;
-        }
-        catch(const std::exception& e) {
-            throw parser_error("number could not be parsed properly", line, column);
-        }
-
-        v = val;
-        return str;
+inline void parse_bool(parser_state& ps, value& v) {
+    if(*ps.str == '\0') {
+        throw parser_error("expected boolean, received EOF instead", ps.line, ps.column);
     }
 
-    template<typename Value>
-    const char* parse_string(const char* str, Value& v) {
-        const char* end = str + 1;
-        if(*end == '\0') {
-            throw parser_error("expected string, received EOF instead", line, column);
-        }
+    bool expected_true = *ps.str == 't';
+    const char* boolean = expected_true ? "true" : "false";
+    const size_t len = expected_true ? 4 : 5;
 
-        while(*end) {
-            if(*end == '\\' && *(end + 1) != '\0' && *(end + 1) == '"') {
-                end = end + 2;
-            }
-            else if(*end == '"') {
-                break;
-            }
-            else {
-                ++end;
-            }
-        }
-
-        if(*end == '\0') {
-            throw parser_error("unescaped string sequence found", line, column);
-        }
-
-        auto&& temp = std::string(str + 1, end);
-        column += temp.size() + 1;
-        v = temp;
-        ++end;
-        return end;
+    if(std::strncmp(ps.str, boolean, len) != 0) {
+        throw parser_error("expected boolean not found", ps.line, ps.column);
     }
 
-    const char* parse_bool(const char* str, value& v) {
-        if(*str == '\0') {
-            throw parser_error("expected boolean, received EOF instead", line, column);
-        }
+    v = expected_true;
+    ps.str = ps.str + len;
+    ps.column += len;
+}
 
-        bool expected_true = *str == 't';
-        const char* boolean = expected_true ? "true" : "false";
-        const size_t len = expected_true ? 4 : 5;
+inline void parse_array(parser_state& ps, value& v) {
+    ++ps.str;
+    array arr;
+    value elem;
+    skip_white_space(ps);
 
-        if(std::strncmp(str, boolean, len) != 0) {
-            throw parser_error("expected boolean not found", line, column);
-        }
-
-        v = expected_true;
-        str = str + len;
-        column += len;
-        return str;
+    if(*ps.str == '\0') {
+        throw parser_error("expected value, received EOF instead", ps.line, ps.column);
     }
 
-    const char* parse_array(const char* str, value& v) {
-        const char *s = str + 1;
-        array arr;
-        value elem;
-        s = skip_white_space(s);
-
-        if(*s == '\0') {
-            throw parser_error("expected value, received EOF instead", line, column);
+    while (*ps.str && *ps.str != ']') {
+        parse_value(ps, elem);
+        if(*ps.str != ',') {
+            if(*ps.str != ']') {
+                throw parser_error("missing comma", ps.line, ps.column);
+            }
+        }
+        else if(*ps.str == ',') {
+            ++ps.str;
+            // skip whitespace
+            skip_white_space(ps);
+            // handle missing input
+            if(*ps.str && *ps.str == ']') {
+                throw parser_error("extraneous comma spotted", ps.line, ps.column);
+            }
         }
 
-        while (*s && *s != ']') {
-            s = parse_value(s, elem);
-            if(*s != ',') {
-                if(*s != ']') {
-                    throw parser_error("missing comma", line, column);
-                }
-            }
-            else if(*s == ',') {
-                ++s;
-                // skip whitespace
-                s = skip_white_space(s);
-                // handle missing input
-                if(*s && *s == ']') {
-                    throw parser_error("extraneous comma spotted", line, column);
-                }
-            }
-
-            arr.push_back(elem);
-        }
-        v = arr;
-        return *s == ']' ? s + 1 : s;
+        arr.push_back(elem);
     }
 
-    const char* parse_object(const char* str, value& v) {
-        const char* s = str + 1;
-        object obj;
-        std::string key;
-        value elem;
-
-        s = skip_white_space(s);
-
-        if(*s == '\0') {
-            throw parser_error("expected string key, received EOF instead", line, column);
-        }
-
-        while(*s) {
-            s = skip_white_space(s);
-
-            // empty object
-            if(*s == '}') {
-                break;
-            }
-
-            if(*s != '"') {
-                throw parser_error("expected string as key not found", line, column);
-            }
-            s = parse_string(s, key);
-            s = skip_white_space(s);
-
-            if(*s != ':') {
-                throw parser_error("missing semicolon", line, column);
-            }
-            ++s;
-            s = parse_value(s, elem);
-
-            if(*s != ',') {
-                if(*s != '}') {
-                    throw parser_error("missing comma", line, column);
-                }
-            }
-            else if(*s == ',') {
-                ++s;
-            }
-            obj.emplace(key, elem);
-        }
-
-        v = obj;
-        return *s == '}' ? s + 1 : s;
+    v = arr;
+    if(*ps.str == ']') {
+        ++ps.str;
     }
-public:
-    parser() = default;
-    parser(const std::string& str, value& v) {
+}
+
+inline void parse_object(parser_state& ps, value& v) {
+    ++ps.str;
+    object obj;
+    std::string key;
+    value elem;
+
+    skip_white_space(ps);
+
+    if(*ps.str == '\0') {
+        throw parser_error("expected string key, received EOF instead", ps.line, ps.column);
+    }
+
+    while(*ps.str) {
+        skip_white_space(ps);
+
+        // empty object
+        if(*ps.str == '}') {
+            break;
+        }
+
+        if(*ps.str != '"') {
+            throw parser_error("expected string as key not found", ps.line, ps.column);
+        }
+        parse_string(ps, key);
+        skip_white_space(ps);
+
+        if(*ps.str != ':') {
+            throw parser_error("missing semicolon", ps.line, ps.column);
+        }
+        ++ps.str;
+        parse_value(ps, elem);
+
+        if(*ps.str != ',') {
+            if(*ps.str != '}') {
+                throw parser_error("missing comma", ps.line, ps.column);
+            }
+        }
+        else if(*ps.str == ',') {
+            ++ps.str;
+        }
+        obj.emplace(key, elem);
+    }
+
+    v = obj;
+    if(*ps.str == '}') {
+        ++ps.str;
+    }
+}
+
+inline void parse_value(parser_state& ps, value& v) {
+    skip_white_space(ps);
+    if(*ps.str == '\0') {
+        throw parser_error("unexpected EOF found", ps.line, ps.column);
+    }
+
+    if(isdigit(*ps.str) || *ps.str == '+' || *ps.str == '-') {
+        parse_number(ps, v);
+    }
+    else {
+        switch(*ps.str) {
+        case 'n':
+            parse_null(ps, v);
+            break;
+        case '"':
+            parse_string(ps, v);
+            break;
+        case 't':
+        case 'f':
+            parse_bool(ps, v);
+            break;
+        case '[':
+            parse_array(ps, v);
+            break;
+        case '{':
+            parse_object(ps, v);
+            break;
+        default:
+            throw parser_error("unexpected token found", ps.line, ps.column);
+            break;
+        }
+    }
+
+    skip_white_space(ps);
+}
+} // detail
+
+inline void parse(const std::string& str, value& v) {
+    detail::parser_state ps = { 1, 1, str.c_str() };
+    detail::parse_value(ps, v);
+    if(*ps.str != '\0') {
+        throw parser_error("unexpected token found", ps.line, ps.column);
+    }
+}
+
+template<typename IStream, DisableIf<is_string<IStream>> = 0>
+inline void parse(IStream& in, value& v) {
+    static_assert(std::is_base_of<std::istream, IStream>::value, "Input stream passed must inherit from std::istream");
+    if(in) {
+        in.seekg(0, in.end);
+        auto size = in.tellg();
+        in.seekg(0, in.beg);
+        std::string str;
+        str.resize(size);
+        in.read(&str[0], size);
         parse(str, v);
     }
-
-    template<typename IStream, DisableIf<is_string<IStream>> = 0>
-    parser(IStream& in, value& v) {
-        parse(in, v);
-    }
-
-    void parse(const std::string& str, value& v) {
-        line = 1;
-        column = 1;
-        auto s = parse_value(str.c_str(), v);
-        if(*s != '\0') {
-            throw parser_error("unexpected token found", line, column);
-        }
-    }
-
-    template<typename IStream, DisableIf<is_string<IStream>> = 0>
-    void parse(IStream& in, value& v) {
-        static_assert(std::is_base_of<std::istream, IStream>::value, "Input stream passed must inherit from std::istream");
-        if(in) {
-            in.seekg(0, in.end);
-            auto size = in.tellg();
-            in.seekg(0, in.beg);
-            std::string str;
-            str.resize(size);
-            in.read(&str[0], size);
-            parse(str, v);
-        }
-    }
-};
+}
 } // v1
 } // json
 

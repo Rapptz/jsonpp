@@ -26,12 +26,11 @@
 // tests for real JSON files found in the wild
 
 TEST_CASE("twitter response", "[real-twitter]") {
-    json::parser p;
     json::value v;
     std::ifstream in("tests/real/twitter.json");
     REQUIRE(in.is_open());
     REQUIRE(in.good());
-    REQUIRE_NOTHROW(p.parse(in, v));
+    REQUIRE_NOTHROW(json::parse(in, v));
     REQUIRE(v.is<json::array>());
     REQUIRE(!v.is<double>());
     REQUIRE(!v.is<json::null>());
