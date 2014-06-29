@@ -270,13 +270,9 @@ template<typename IStream, DisableIf<is_string<IStream>> = 0>
 inline void parse(IStream& in, value& v) {
     static_assert(std::is_base_of<std::istream, IStream>::value, "Input stream passed must inherit from std::istream");
     if(in) {
-        in.seekg(0, in.end);
-        auto size = in.tellg();
-        in.seekg(0, in.beg);
-        std::string str;
-        str.resize(size);
-        in.read(&str[0], size);
-        parse(str, v);
+        std::ostringstream ss;
+        ss << in.rdbuf();
+        parse(ss.str(), v);
     }
 }
 } // v1
