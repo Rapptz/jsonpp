@@ -36,9 +36,21 @@ struct parser_state {
     const char* str;
 };
 
+inline bool is_space(char ch) {
+    switch(ch) {
+    case 0x0D: // carriage return
+    case 0x09: // tab
+    case 0x0A: // line feed
+    case 0x20: // space
+        return true;
+    default:
+        return false;
+    }
+}
+
 inline void skip_white_space(parser_state& ps) {
-    while(*ps.str && isspace(*ps.str)) {
-        if(*ps.str == '\n') {
+    while(*ps.str != '\0' && is_space(*ps.str)) {
+        if(*ps.str == 0x0A) {
             ++ps.line;
             ps.column = 0;
         }

@@ -320,7 +320,7 @@ TEST_CASE("null and bool", "[basic-null-bool]") {
     json::value v;
 
     SECTION("parsing") {
-        REQUIRE_NOTHROW(json::parse("\n\n\tnull\n\n\f", v));
+        REQUIRE_NOTHROW(json::parse("\n\n\tnull\n\n\t", v));
         REQUIRE(v.is<json::null>());
         REQUIRE(v.is<std::nullptr_t>());
         REQUIRE(!v.is<json::array>());
@@ -333,7 +333,7 @@ TEST_CASE("null and bool", "[basic-null-bool]") {
         auto&& x = v.as<json::null>();
         REQUIRE(x == nullptr);
 
-        REQUIRE_NOTHROW(json::parse("\t\n\f\n\ttrue\n\t\n\f", v));
+        REQUIRE_NOTHROW(json::parse("\t\n\t\n\ttrue\n\t\n\t", v));
         REQUIRE(v.is<bool>());
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<std::nullptr_t>());
