@@ -32,7 +32,7 @@
 
 namespace json {
 inline namespace v1 {
-struct value {
+class value {
 public:
     using object = std::map<std::string, value>;
     using array  = std::vector<value>;
@@ -319,6 +319,29 @@ public:
     template<typename T>
     T as(Identity<T>&& def) const noexcept {
         return is<T>() ? as<T>() : std::forward<T>(def);
+    }
+
+    template<typename T>
+    value operator[] (T& str) const noexcept{
+        if(not is<object>() )
+            return value(nullptr);
+
+        auto iter = storage.obj->find(str);
+        if(iter == storage.obj->end())
+            return value(nullptr);
+        else
+            return iter->second;
+    }
+
+    template<typename T, EnableIf<is_number<T>> = 0>
+    value operator[] (T idx) const noexcept{
+        if(not is<array>() )
+            return value(nullptr);
+
+        if((size_t)idx >= storage.arr->size())
+            return value(nullptr);
+        else
+            return storage.arr->at(idx);
     }
 };
 
