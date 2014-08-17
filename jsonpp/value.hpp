@@ -321,27 +321,31 @@ public:
         return is<T>() ? as<T>() : std::forward<T>(def);
     }
 
-    template<typename T>
-    value operator[] (T& str) const noexcept{
-        if(not is<object>() )
-            return value(nullptr);
+    template<typename T, EnableIf<is_string<T>> = 0>
+    value operator[](const T& str) const noexcept {
+        if(!is<object>()) {
+            return {};
+        }
 
-        auto iter = storage.obj->find(str);
-        if(iter == storage.obj->end())
-            return value(nullptr);
-        else
-            return iter->second;
+        auto it = storage.obj->find(str);
+        if(it != storage.obj->end()) {
+            return it->second;
+        }
+        return {};
     }
 
     template<typename T, EnableIf<is_number<T>> = 0>
-    value operator[] (T idx) const noexcept{
-        if(not is<array>() )
-            return value(nullptr);
+    value operator[](const T& index) const noexcept {
+        if(!is<array>()) {
+            return {};
+        }
 
-        if((size_t)idx >= storage.arr->size())
-            return value(nullptr);
-        else
-            return storage.arr->at(idx);
+        auto&& arr = *storage.arr;
+
+        if(static_cast<size_t>(index) < arr.size()) {
+            return arr[index];
+        }
+        return {};
     }
 };
 
