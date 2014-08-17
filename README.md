@@ -56,10 +56,10 @@ int main() {
     json::value o = json::object{ {"key", "value"}, {"key2", 2}  };
     std::cout << v.to_string();
 
-    //You can accessed the JSON object like this
-    std::cout << v[0].to_string(); //Should return null
-    std::cout << o["key"].to_string(); //Should return "value"
-    std::cout << o["key2"].to_string(); //Should return "2"
+    // you can access the JSON object like this
+    std::cout << v[0].to_string(); // returns null
+    std::cout << o["key"].to_string(); // returns "value"
+    std::cout << o["key2"].to_string(); // returns "2"
 }
 ```
 

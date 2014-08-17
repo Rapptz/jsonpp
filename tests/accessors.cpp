@@ -33,13 +33,13 @@ TEST_CASE("accessors", "[subscripts-accessors]") {
         REQUIRE(v[3].is<double>());
         REQUIRE(v[3].is<float>());
         REQUIRE(v[3].is<int>());
-        REQUIRE(v[4].is<json::null>()); //Never throw, return json::null
+        REQUIRE(v[4].is<json::null>()); // never throw, return json::null
     };
 
     SECTION("get from json::object") {
         REQUIRE(o["key"].is<std::string>());
         REQUIRE(o["int"].is<int>());
-        REQUIRE(o["unexist"].is<json::null>()); //Never throw, return json::null
+        REQUIRE(o["unexist"].is<json::null>()); // never throw, return json::null
     };
 
     SECTION("get from complex structure") {
