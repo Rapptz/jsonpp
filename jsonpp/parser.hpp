@@ -100,34 +100,158 @@ inline void parse_number(parser_state& ps, value& v) {
     v = val;
 }
 
+inline int get_codepoint(parser_state& ps, const char*& str) {
+    int codepoint = 0;
+    for(unsigned i = 0; i < 4; ++i) {
+        char hex = *str;
+        if(hex <= 0x1F) {
+            throw parser_error("incomplete codepoint provided", ps.line, ps.column);
+        }
+
+        // convert the hex character to its integral representation
+        // e.g., 'F' -> 15
+        if(hex >= '0' && hex <= '9') {
+            hex -= '0';
+        }
+        else if(hex >= 'A' && hex <= 'F') {
+            hex -= 'A' - 0xA;
+        }
+        else if(hex >= 'a' && hex <= 'f') {
+            hex -= 'a' - 0xA;
+        }
+        else {
+            throw parser_error("invalid codepoint provided", ps.line, ps.column);
+        }
+
+        codepoint = codepoint * 16 + hex;
+        ++ps.column;
+        ++str;
+    }
+    return codepoint;
+}
+
+inline void parse_codepoint(parser_state& ps, const char*& str, std::string& result) {
+    // parse the hex characters
+    // in order to do so, we have to increment by one to get these digits.
+    // ergo, *str == 'u', ++str = codepoint
+    ++str;
+    ++ps.column;
+    int codepoint = get_codepoint(ps, str);
+
+    // a regular ASCII code point
+    if(codepoint < 0x80) {
+        result.push_back(codepoint);
+        return;
+    }
+
+    // handle surrogate pairs
+    if(codepoint >= 0xD800 && codepoint <= 0xDFFF) {
+        if(codepoint >= 0xDC00) {
+            throw parser_error("low surrogate pair found but high surrogate pair expected", ps.line, ps.column);
+        }
+
+        // get the  low surrogate pair
+        if(*(str + 1) != '\\' && *(str + 2) != 'u') {
+            throw parser_error("low surrogate pair expected but not found", ps.line, ps.column);
+        }
+
+        str += 2;
+        int low_surrogate = get_codepoint(ps, str);
+        if(low_surrogate < 0xDC00 || low_surrogate > 0xDFFF) {
+            throw parser_error("low surrogate out of range [\\uDC000, \\uDFFF]", ps.line, ps.column);
+        }
+
+        codepoint = 0x10000 + (((codepoint - 0xD800) << 10) | ((low_surrogate - 0xDC00) & 0x3FF));
+    }
+
+    if(codepoint < 0x800) {
+        result.push_back(0xC0 | (codepoint >> 6));
+    }
+    else if(codepoint < 0x10000) {
+        result.push_back(0xE0 | (codepoint >> 12));
+    }
+    else {
+        result.push_back(0xF0 | (codepoint >> 18));
+        result.push_back(0x80 | ((codepoint >> 12) & 0x3F));
+    }
+    result.push_back(0x80 | ((codepoint >> 6) & 0x3F));
+    result.push_back(0x80 | (codepoint & 0x3F));
+}
+
 template<typename Value>
 inline void parse_string(parser_state& ps, Value& v) {
-    const char* end = ps.str + 1;
-    if(*end == '\0') {
+    const char* str = ps.str + 1;
+    if(*str == '\0') {
         throw parser_error("expected string, received EOF instead", ps.line, ps.column);
     }
 
-    while(*end) {
-        if(*end == '\\' && *(end + 1) != '\0' && *(end + 1) == '"') {
-            end = end + 2;
+    std::string result;
+
+    // begin parsing
+    while(true) {
+        ++ps.column;
+        bool increment_string = true;
+
+        if(*str <= 0x1F) {
+            throw parser_error("invalid characters found in string or string is incomplete", ps.line, ps.column);
         }
-        else if(*end == '"') {
+
+        // end of string found
+        if(*str == '"') {
             break;
         }
-        else {
-            ++end;
+
+        // non-escape character is good to go
+        if(*str != '\\') {
+            result.push_back(*str++);
+            continue;
+        }
+
+        // at this point *str == '\\'
+        // so increment it to check the next character
+        ++str;
+        switch(*str) {
+        case '/':
+            result.push_back('/');
+            break;
+        case '\\':
+            result.push_back('\\');
+            break;
+        case '"':
+            result.push_back('\"');
+            break;
+        case 'f':
+            result.push_back('\f');
+            break;
+        case 'n':
+            result.push_back('\n');
+            break;
+        case 'r':
+            result.push_back('\r');
+            break;
+        case 't':
+            result.push_back('\t');
+            break;
+        case 'b':
+            result.push_back('\b');
+            break;
+        case 'u':
+            parse_codepoint(ps, str, result);
+            increment_string = false;
+            break;
+        default:
+            throw parser_error("improper or incomplete escape character found", ps.line, ps.column);
+
+        }
+
+        if(increment_string) {
+            ++str;
         }
     }
 
-    if(*end == '\0') {
-        throw parser_error("unescaped string sequence found", ps.line, ps.column);
-    }
-
-    auto&& temp = std::string(ps.str + 1, end);
-    ps.column += temp.size() + 1;
-    v = temp;
-    ++end;
-    ps.str = end;
+    v = result;
+    ++str;
+    ps.str = str;
 }
 
 inline void parse_bool(parser_state& ps, value& v) {
