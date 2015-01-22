@@ -81,6 +81,17 @@ struct is_value : public std::is_same<T, value> {};
 template<typename T, typename U = typename std::decay<T>::type>
 struct is_string : public Or<std::is_same<U, std::string>, std::is_same<U, const char*>, std::is_same<U, char*>> {};
 
+struct has_to_json_impl {
+    template<typename T, typename U = decltype(to_json(std::declval<T>()))>
+    static is_value<U> test(int);
+
+    template<typename...>
+    static std::false_type test(...);
+};
+
+template<typename T>
+struct has_to_json : decltype(has_to_json_impl::test<T>(0)) {};
+
 enum class type {
     null, string, boolean, number, array, object
 };

@@ -241,7 +241,6 @@ inline void parse_string(parser_state& ps, Value& v) {
             break;
         default:
             throw parser_error("improper or incomplete escape character found", ps.line, ps.column);
-
         }
 
         if(increment_string) {

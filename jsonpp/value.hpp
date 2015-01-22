@@ -80,16 +80,19 @@ public:
         storage.number = v;
     }
 
-    template<typename T, EnableIf<is_bool<T>> = 0>
+    template<typename T, EnableIf<is_bool<T>, Not<is_string<T>>> = 0>
     value(const T& b) noexcept: storage_type(type::boolean) {
         storage.boolean = b;
     }
 
 
-    template<typename T, EnableIf<is_string<T>> = 0>
+    template<typename T, EnableIf<is_string<T>, Not<is_bool<T>>> = 0>
     value(const T& str): storage_type(type::string) {
         storage.str = new std::string(str);
     }
+
+    template<typename T, EnableIf<has_to_json<T>, Not<is_string<T>>, Not<is_bool<T>>> = 0>
+    value(const T& t): value(to_json(t)) {}
 
     value(const array& arr): storage_type(type::array) {
         storage.arr = new array(arr);
@@ -133,6 +136,12 @@ public:
 
         storage_type = other.storage_type;
         other.storage_type = type::null;
+    }
+
+    template<typename T, EnableIf<has_to_json<T>, Not<is_string<T>>, Not<is_bool<T>>> = 0>
+    value& operator=(const T& t) {
+        *this = to_json(t);
+        return *this;
     }
 
     value& operator=(const value& other) noexcept {
