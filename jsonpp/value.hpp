@@ -145,42 +145,38 @@ public:
     }
 
     value& operator=(const value& other) noexcept {
-        if(this != &other) {
-            clear();
-            copy(other);
-        }
+        clear();
+        copy(other);
         return *this;
     }
 
     value& operator=(value&& other) {
-        if(this != &other) {
-            clear();
-            switch(other.storage_type) {
-            case type::array:
-                storage.arr = other.storage.arr;
-                other.storage.arr = nullptr;
-                break;
-            case type::string:
-                storage.str = other.storage.str;
-                other.storage.str = nullptr;
-                break;
-            case type::object:
-                storage.obj = other.storage.obj;
-                other.storage.obj = nullptr;
-                break;
-            case type::boolean:
-                storage.boolean = other.storage.boolean;
-                break;
-            case type::number:
-                storage.number = other.storage.number;
-                break;
-            default:
-                break;
-            }
-
-            storage_type = other.storage_type;
-            other.storage_type = type::null;
+        clear();
+        switch(other.storage_type) {
+        case type::array:
+            storage.arr = other.storage.arr;
+            other.storage.arr = nullptr;
+            break;
+        case type::string:
+            storage.str = other.storage.str;
+            other.storage.str = nullptr;
+            break;
+        case type::object:
+            storage.obj = other.storage.obj;
+            other.storage.obj = nullptr;
+            break;
+        case type::boolean:
+            storage.boolean = other.storage.boolean;
+            break;
+        case type::number:
+            storage.number = other.storage.number;
+            break;
+        default:
+            break;
         }
+
+        storage_type = other.storage_type;
+        other.storage_type = type::null;
         return *this;
     }
 
