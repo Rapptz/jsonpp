@@ -50,19 +50,22 @@ inline void indent_by(OStream& out, int indent, int depth) {
 
 template<typename OStream, typename T, EnableIf<is_null<T>> = 0>
 inline OStream& dump(OStream& out, const T&, int /* indent */, int /* opts */, int /* depth */) {
-    return out << "null";
+    out << "null";
+    return out;
 }
 
 template<typename OStream, typename T, EnableIf<is_bool<T>> = 0>
 inline OStream& dump(OStream& out, const T& t, int /* indent */, int /* opts */, int /* depth */) {
-    return out << (t ? "true" : "false");
+    out << (t ? "true" : "false");
+    return out;
 }
 
 template<typename OStream, typename T, EnableIf<is_number<T>> = 0>
 inline OStream& dump(OStream& out, const T& t, int /* indent */, int opts, int /* depth */) {
     if((opts & option::allow_nan_inf) != option::allow_nan_inf && (std::isnan(t) || std::isinf(t))) {
         // stream null instead if nan is found
-        return out << "null";
+        out << "null";
+        return out;
     }
     auto precision = out.precision();
     out.precision(17);
@@ -121,7 +124,8 @@ inline OStream& dump(OStream& out, const T& t, int /* indent */, int /* opts */,
             break;
         }
     }
-    return out << '"';
+    out << '"';
+    return out;
 }
 
 template<typename OStream, typename T, EnableIf<is_array<T>> = 0>
@@ -155,7 +159,8 @@ inline OStream& dump(OStream& out, const T& t, int indent, int opts, int depth) 
         }
     }
 
-    return out << ']';
+    out << ']';
+    return out;
 }
 
 template<typename OStream, typename T, EnableIf<std::is_arithmetic<T>> = 0>
@@ -211,7 +216,8 @@ inline OStream& dump(OStream& out, const T& t, int indent, int opts, int depth) 
         }
     }
 
-    return out << '}';
+    out << '}';
+    return out;
 }
 } // detail
 
