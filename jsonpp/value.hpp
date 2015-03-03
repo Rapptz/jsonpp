@@ -23,12 +23,15 @@
 #define JSONPP_VALUE_HPP
 
 #include "type_traits.hpp"
+#include "dump.hpp"
 #include <string>
 #include <sstream>
 #include <map>
 #include <vector>
 #include <cassert>
+#include <cstdint>
 #include <memory>
+#include <iosfwd>
 
 namespace json {
 inline namespace v1 {
@@ -197,58 +200,6 @@ public:
         storage_type = type::null;
     }
 
-    std::string to_string(unsigned precision = 6) const {
-        switch(storage_type) {
-        case type::null:
-            return "null";
-        case type::number: {
-            char buffer[328];
-            std::snprintf(buffer, 328, "%.*g", precision, storage.number);
-            return buffer;
-        }
-        case type::boolean:
-            return storage.boolean ? "true" : "false";
-        case type::string:
-            return '"' + *(storage.str) + '"';
-        case type::array: {
-            std::ostringstream ss;
-            ss.precision(precision);
-            ss << "[";
-            auto first = storage.arr->begin();
-            auto last = storage.arr->end();
-            if(first != last) {
-                ss << first->to_string(precision);
-                ++first;
-            }
-            while(first != last) {
-                ss << ',' << first->to_string(precision);
-                ++first;
-            }
-            ss << "]";
-            return ss.str();
-        }
-        case type::object: {
-            std::ostringstream ss;
-            ss.precision(precision);
-            ss << "{";
-            auto begin = storage.obj->begin();
-            auto end = storage.obj->end();
-            if(begin != end) {
-                ss << '"' << begin->first << "\":" << begin->second.to_string(precision);
-                ++begin;
-            }
-
-            while(begin != end) {
-                ss << ",\"" << begin->first << "\":" << begin->second.to_string(precision);
-                ++begin;
-            }
-            ss << "}";
-            return ss.str();
-        }
-        }
-        return "";
-    }
-
     template<typename T, EnableIf<is_string<T>> = 0>
     bool is() const noexcept {
         return storage_type == type::string;
@@ -351,6 +302,27 @@ public:
             return arr[index];
         }
         return {};
+    }
+
+    template<typename OStream>
+    friend OStream& dump(OStream& out, const value& val, int indent, int opts, int depth) {
+        using detail::dump;
+        switch(val.storage_type) {
+        case type::array:
+            return dump(out, *val.storage.arr, indent, opts, depth);
+        case type::string:
+            return dump(out, *val.storage.str, indent, opts, depth);
+        case type::object:
+            return dump(out, *val.storage.obj, indent, opts, depth);
+        case type::boolean:
+            return dump(out, val.storage.boolean, indent, opts, depth);
+        case type::number:
+            return dump(out, val.storage.number, indent, opts, depth);
+        case type::null:
+            return dump(out, nullptr, indent, opts, depth);
+        default:
+            return out;
+        }
     }
 };
 

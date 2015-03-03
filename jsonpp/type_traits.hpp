@@ -35,6 +35,9 @@ struct identity {
 template<typename T>
 using Identity = typename identity<T>::type;
 
+template<typename T>
+using Unqualified = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+
 template<bool B>
 using Bool = std::integral_constant<bool, B>;
 
@@ -76,10 +79,10 @@ struct is_null : std::is_same<T, null> {};
 class value;
 
 template<typename T>
-struct is_value : public std::is_same<T, value> {};
+struct is_value : std::is_same<T, value> {};
 
 template<typename T, typename U = typename std::decay<T>::type>
-struct is_string : public Or<std::is_same<U, std::string>, std::is_same<U, const char*>, std::is_same<U, char*>> {};
+struct is_string : Or<std::is_same<U, std::string>, std::is_same<U, const char*>, std::is_same<U, char*>> {};
 
 struct has_to_json_impl {
     template<typename T, typename U = decltype(to_json(std::declval<T>()))>
@@ -88,6 +91,54 @@ struct has_to_json_impl {
     template<typename...>
     static std::false_type test(...);
 };
+
+namespace detail {
+using std::end;
+using std::begin;
+
+// checks if a type has iterator support
+struct has_iterators_impl {
+    template<typename T, typename B = decltype(begin(std::declval<T>())),
+                         typename E = decltype(end(std::declval<T>()))>
+    static std::true_type test(int);
+    template<typename...>
+    static std::false_type test(...);
+};
+
+template<typename T>
+struct is_possible_key_type : Or<is_bool<T>, is_number<T>, is_string<T>, is_value<T>> {};
+
+// a trait to try to guess for a vector as close as possible
+struct is_array_impl {
+    template<typename T, typename U = Unqualified<T>,
+                         typename V = typename U::value_type,
+                         typename S = decltype(std::declval<U>().shrink_to_fit()),
+                         typename R = decltype(std::declval<U>().reserve(0))>
+    static std::true_type test(int);
+    template<typename...>
+    static std::false_type test(...);
+};
+
+// a trait to try to guess for key value pair as close as possible
+struct is_object_impl {
+    template<typename T, typename U = Unqualified<T>,
+                         typename K = typename U::key_type,
+                         typename V = typename U::mapped_type,
+                         typename C = typename U::key_compare>
+    static is_possible_key_type<K> test(int);
+    template<typename...>
+    static std::false_type test(...);
+};
+} // detail
+
+template<typename T>
+struct has_iterators : decltype(detail::has_iterators_impl::test<T>(0)) {};
+
+template<typename T>
+struct is_array : And<Or<decltype(detail::is_array_impl::test<T>(0)), std::is_array<T>>, has_iterators<T>, Not<is_string<T>>> {};
+
+template<typename T>
+struct is_object : And<decltype(detail::is_object_impl::test<T>(0)), has_iterators<T>> {};
 
 template<typename T>
 struct has_to_json : decltype(has_to_json_impl::test<T>(0)) {};

@@ -127,21 +127,21 @@ TEST_CASE("strings", "[basic-strings]") {
         REQUIRE(!v.is<bool>());
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<json::object>());
-        REQUIRE(v.to_string() == R"("\"")");
+        REQUIRE(v.to_string() == "\"\"\"");
 
         auto&& str1 = v.as<std::string>();
         REQUIRE(str1.size() == 2);
         REQUIRE(str1.back() == '"');
         REQUIRE(str1.front() == '\\');
 
-        REQUIRE_NOTHROW(json::parse(R"("\t\n\v\b\"\u2000\u1234")", v));
+        REQUIRE_NOTHROW(json::parse(R"("\t\n\b\"\u2000\u1234")", v));
         REQUIRE(!v.is<json::array>());
         REQUIRE(!v.is<double>());
         REQUIRE(v.is<std::string>());
         REQUIRE(v.is<const char*>());
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<json::object>());
-        REQUIRE(v.to_string() == R"("\t\n\v\b\"\u2000\u1234")");
+        REQUIRE(v.to_string() == "\"\t\n\x08\"\xe2\x80\x80\xe1\x88\xb4\"");
 
         auto&& str2 = v.as<std::string>();
         REQUIRE(str2.size() == 22);
