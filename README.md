@@ -1,5 +1,7 @@
 ## jsonpp
 
+[![Build Status](https://travis-ci.org/Rapptz/jsonpp.svg?branch=master)](https://travis-ci.org/Rapptz/jsonpp)
+
 jsonpp is a header-only JSON parser and writer that is currently in development. It is a semi-strict
 parser that throws exceptions for errors.
 
@@ -53,30 +55,30 @@ stuff hello stuff
 
 int main() {
     json::value v = { nullptr, "hello", 10 };
-    json::value o = json::object{ {"key", "value"}, {"key2", 2}  };
-    std::cout << v.to_string();
-
-    // you can access the JSON object like this
-    std::cout << v[0].to_string(); // returns null
-    std::cout << o["key"].to_string(); // returns "value"
-    std::cout << o["key2"].to_string(); // returns "2"
+    json::object o = {
+        { "key", "value" },
+        { "key2", 2 },
+        { "key3", nullptr }
+    };
+    json::dump(std::cout, o);
 }
 ```
 
 Output:
 <pre>
-[null,"hello",10]
+{
+    "key": "value",
+    "key2": 2,
+    "key3": null
+}
 </pre>
 
 ## Quirks and Specification
 
 - NaN and inf are currently allowed.
 - Comments, e.g. `// stuff` is planned to be supported in the future.
-- The string is only passed once.
 - The parser is not destructive.
 - The parser is recursive descent.
-- `int` and `double` types are aliased to be the same.
-- Forward slashes are not escaped.
+- `int` and `double` types are currently aliased to be the same.
 - String is expected to be in UTF-8.
-- Currently, no input validation is done on strings.
 - Some errors are not caught but effort has been made to catch a lot of errors.
