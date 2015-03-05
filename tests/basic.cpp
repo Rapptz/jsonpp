@@ -24,6 +24,9 @@
 
 TEST_CASE("numbers", "[basic-numbers]") {
     json::value v;
+    json::format_options minify;
+    minify.indent = 0;
+    minify.flags = minify.minify;
 
     SECTION("parsing") {
         REQUIRE_NOTHROW(json::parse("\t\n\n10", v));
@@ -37,7 +40,7 @@ TEST_CASE("numbers", "[basic-numbers]") {
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
         REQUIRE(v.as<int>() == 10);
-        REQUIRE(v.to_string() == "10");
+        REQUIRE(json::dump_string(v, minify) == "10");
 
         REQUIRE_NOTHROW(json::parse("\t\t\n2.14567e+101", v));
         REQUIRE(v.is<int>());
@@ -49,7 +52,7 @@ TEST_CASE("numbers", "[basic-numbers]") {
         REQUIRE(!v.is<json::array>());
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
-        REQUIRE(v.to_string() == "2.14567e+101");
+        REQUIRE(json::dump_string(v, minify) == "2.14567e+101");
 
         REQUIRE_NOTHROW(json::parse("\t\n\n-10", v));
         REQUIRE(v.is<int>());
@@ -62,7 +65,7 @@ TEST_CASE("numbers", "[basic-numbers]") {
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
         REQUIRE(v.as<int>() == -10);
-        REQUIRE(v.to_string() == "-10");
+        REQUIRE(json::dump_string(v, minify) == "-10");
     }
 
     SECTION("writing") {
@@ -77,7 +80,7 @@ TEST_CASE("numbers", "[basic-numbers]") {
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
         REQUIRE(v.as<int>() == 10);
-        REQUIRE(v.to_string() == "10");
+        REQUIRE(json::dump_string(v, minify) == "10");
 
         v = 1.23456;
         REQUIRE(v.is<int>());
@@ -89,7 +92,7 @@ TEST_CASE("numbers", "[basic-numbers]") {
         REQUIRE(!v.is<json::array>());
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
-        REQUIRE(v.to_string() == "1.23456");
+        REQUIRE(json::dump_string(v, minify) == "1.23456");
     }
 
     SECTION("invalid") {
@@ -102,6 +105,9 @@ TEST_CASE("numbers", "[basic-numbers]") {
 
 TEST_CASE("strings", "[basic-strings]") {
     json::value v;
+    json::format_options minify;
+    minify.indent = 0;
+    minify.flags = minify.minify;
 
     SECTION("empty string") {
         REQUIRE_NOTHROW(json::parse("\t\n\"\"\n\n", v));
@@ -112,7 +118,7 @@ TEST_CASE("strings", "[basic-strings]") {
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<bool>());
         REQUIRE(!v.is<json::object>());
-        REQUIRE(v.to_string() == "\"\"");
+        REQUIRE(json::dump_string(v, minify) == "\"\"");
 
         auto&& str = v.as<std::string>();
         REQUIRE(str.empty());
@@ -127,12 +133,11 @@ TEST_CASE("strings", "[basic-strings]") {
         REQUIRE(!v.is<bool>());
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<json::object>());
-        REQUIRE(v.to_string() == "\"\"\"");
+        REQUIRE(json::dump_string(v, minify) == R"("\"")");
 
         auto&& str1 = v.as<std::string>();
-        REQUIRE(str1.size() == 2);
+        REQUIRE(str1.size() == 1);
         REQUIRE(str1.back() == '"');
-        REQUIRE(str1.front() == '\\');
 
         REQUIRE_NOTHROW(json::parse(R"("\t\n\b\"\u2000\u1234")", v));
         REQUIRE(!v.is<json::array>());
@@ -141,11 +146,11 @@ TEST_CASE("strings", "[basic-strings]") {
         REQUIRE(v.is<const char*>());
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<json::object>());
-        REQUIRE(v.to_string() == "\"\t\n\x08\"\xe2\x80\x80\xe1\x88\xb4\"");
+        REQUIRE(json::dump_string(v, minify) == "\"\\t\\n\\b\\\"\xe2\x80\x80\xe1\x88\xb4\"");
 
         auto&& str2 = v.as<std::string>();
-        REQUIRE(str2.size() == 22);
-        REQUIRE(str2 == R"(\t\n\v\b\"\u2000\u1234)");
+        REQUIRE(str2.size() == 10);
+        REQUIRE(str2 == u8"\t\n\b\"\u2000\u1234");
     }
 
     SECTION("regular string") {
@@ -157,7 +162,7 @@ TEST_CASE("strings", "[basic-strings]") {
         REQUIRE(v.is<const char*>());
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<json::object>());
-        REQUIRE(v.to_string() == "\"hello world\"");
+        REQUIRE(json::dump_string(v, minify) == "\"hello world\"");
 
         auto&& str = v.as<std::string>();
         REQUIRE(!str.empty());
@@ -174,7 +179,7 @@ TEST_CASE("strings", "[basic-strings]") {
         REQUIRE(v.is<const char*>());
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<json::object>());
-        REQUIRE(v.to_string() == "\"hello\"");
+        REQUIRE(json::dump_string(v, minify) == "\"hello\"");
 
         auto&& str = v.as<std::string>();
         REQUIRE(!str.empty());
@@ -192,6 +197,9 @@ TEST_CASE("strings", "[basic-strings]") {
 
 TEST_CASE("arrays", "[basic-arrays]") {
     json::value v;
+    json::format_options minify;
+    minify.indent = 0;
+    minify.flags = minify.minify;
 
     SECTION("empty array") {
         REQUIRE_NOTHROW(json::parse("\t\t\n\t\n[]\n\t\t\n\n", v));
@@ -201,7 +209,7 @@ TEST_CASE("arrays", "[basic-arrays]") {
         REQUIRE(!v.is<std::string>());
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<json::object>());
-        REQUIRE(v.to_string() == "[]");
+        REQUIRE(json::dump_string(v, minify) == "[]");
         auto&& arr = v.as<json::array>();
         REQUIRE(arr.empty());
     }
@@ -214,7 +222,7 @@ TEST_CASE("arrays", "[basic-arrays]") {
         REQUIRE(!v.is<std::string>());
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<json::object>());
-        REQUIRE(v.to_string() == "[10]");
+        REQUIRE(json::dump_string(v, minify) == "[10]");
         auto&& arr = v.as<json::array>();
         REQUIRE(!arr.empty());
         REQUIRE(arr.size() == 1);
@@ -230,7 +238,7 @@ TEST_CASE("arrays", "[basic-arrays]") {
         REQUIRE(!v.is<std::string>());
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<json::object>());
-        REQUIRE(v.to_string() == "[null,\"hello\",10,\"wow\"]");
+        REQUIRE(json::dump_string(v, minify) == "[null,\"hello\",10,\"wow\"]");
         auto&& arr = v.as<json::array>();
         REQUIRE(!arr.empty());
         REQUIRE(arr.size() == 4);
@@ -293,7 +301,7 @@ TEST_CASE("arrays", "[basic-arrays]") {
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
-        REQUIRE(v.to_string() == "[10,null,\"hello\",1.23456]");
+        REQUIRE(json::dump_string(v, minify) == "[10,null,\"hello\",1.23456]");
 
         auto&& arr = v.as<json::array>();
         REQUIRE(!arr.empty());
@@ -318,6 +326,9 @@ TEST_CASE("arrays", "[basic-arrays]") {
 
 TEST_CASE("null and bool", "[basic-null-bool]") {
     json::value v;
+    json::format_options minify;
+    minify.indent = 0;
+    minify.flags = minify.minify;
 
     SECTION("parsing") {
         REQUIRE_NOTHROW(json::parse("\n\n\tnull\n\n\t", v));
@@ -328,7 +339,7 @@ TEST_CASE("null and bool", "[basic-null-bool]") {
         REQUIRE(!v.is<std::string>());
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
-        REQUIRE(v.to_string() == "null");
+        REQUIRE(json::dump_string(v, minify) == "null");
 
         auto&& x = v.as<json::null>();
         REQUIRE(x == nullptr);
@@ -342,7 +353,7 @@ TEST_CASE("null and bool", "[basic-null-bool]") {
         REQUIRE(!v.is<std::string>());
         REQUIRE(!v.is<json::object>());
         REQUIRE(v.as<bool>());
-        REQUIRE(v.to_string() == "true");
+        REQUIRE(json::dump_string(v, minify) == "true");
 
         REQUIRE_NOTHROW(json::parse("\n\n\t\nfalse\n\t\n", v));
         REQUIRE(v.is<bool>());
@@ -353,7 +364,7 @@ TEST_CASE("null and bool", "[basic-null-bool]") {
         REQUIRE(!v.is<std::string>());
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.as<bool>());
-        REQUIRE(v.to_string() == "false");
+        REQUIRE(json::dump_string(v, minify) == "false");
     }
 
     SECTION("writing") {
@@ -365,7 +376,7 @@ TEST_CASE("null and bool", "[basic-null-bool]") {
         REQUIRE(!v.is<std::string>());
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
-        REQUIRE(v.to_string() == "null");
+        REQUIRE(json::dump_string(v, minify) == "null");
 
         v = true;
         REQUIRE(!v.is<json::null>());
@@ -375,7 +386,7 @@ TEST_CASE("null and bool", "[basic-null-bool]") {
         REQUIRE(!v.is<std::string>());
         REQUIRE(!v.is<json::object>());
         REQUIRE(v.is<bool>());
-        REQUIRE(v.to_string() == "true");
+        REQUIRE(json::dump_string(v, minify) == "true");
         REQUIRE(v.as<bool>());
 
         v = false;
@@ -386,7 +397,7 @@ TEST_CASE("null and bool", "[basic-null-bool]") {
         REQUIRE(!v.is<std::string>());
         REQUIRE(!v.is<json::object>());
         REQUIRE(v.is<bool>());
-        REQUIRE(v.to_string() == "false");
+        REQUIRE(json::dump_string(v, minify) == "false");
         REQUIRE(!v.as<bool>());
     }
 
@@ -406,6 +417,9 @@ TEST_CASE("null and bool", "[basic-null-bool]") {
 
 TEST_CASE("objects", "[basic-objects]") {
     json::value v;
+    json::format_options minify;
+    minify.indent = 0;
+    minify.flags = minify.minify;
 
     SECTION("empty objects") {
         REQUIRE_NOTHROW(json::parse("\t\n\t\n{     \t\n }\n\n\t\n", v));
@@ -416,7 +430,7 @@ TEST_CASE("objects", "[basic-objects]") {
         REQUIRE(!v.is<std::string>());
         REQUIRE(v.is<json::object>());
         REQUIRE(!v.is<bool>());
-        REQUIRE(v.to_string() == "{}");
+        REQUIRE(json::dump_string(v, minify) == "{}");
 
         auto&& obj = v.as<json::object>();
         REQUIRE(obj.empty());
@@ -431,7 +445,7 @@ TEST_CASE("objects", "[basic-objects]") {
         REQUIRE(!v.is<std::string>());
         REQUIRE(v.is<json::object>());
         REQUIRE(!v.is<bool>());
-        REQUIRE(v.to_string() == "{\"hello\":10}");
+        REQUIRE(json::dump_string(v, minify) == "{\"hello\":10}");
 
         auto&& obj = v.as<json::object>();
         REQUIRE(!obj.empty());
