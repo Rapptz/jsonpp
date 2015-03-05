@@ -15,11 +15,11 @@ matrix:
 
 # Install dependencies
 before_install:
+    - export MAIN_PATH=$(pwd)
     - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
     - sudo add-apt-repository -y ppa:saiarcot895/chromium-beta
     - sudo apt-get update -qq
     - sudo apt-get install -qq ninja-build
-    - if [ "$CXX" = "g++" ]; then export LIBCXX="0"; fi
     - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-${GCC_VERSION}; fi
     - if [ "$CXX" = "g++" ]; then export CXX="g++-${GCC_VERSION}" CC="gcc-${GCC_VERSION}"; fi
     - export BS_FLAGS="--cxx=$CXX"
@@ -35,6 +35,7 @@ before_install:
     - if [ -n "$LIBCXX" -a "$CXX" == "clang++" ]; then sudo ln -sf libc++.so.1.0 libc++.so.1 && cd $cwd; fi
 
 install:
+    - cd "$MAIN_PATH"
     - ./bootstrap.py $BS_FLAGS
 
 script:
