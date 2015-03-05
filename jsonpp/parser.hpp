@@ -191,8 +191,9 @@ inline void parse_string(parser_state& ps, Value& v) {
     while(true) {
         ++ps.column;
         bool increment_string = true;
+        auto byte = static_cast<unsigned char>(*str);
 
-        if(*str <= 0x1F) {
+        if(byte <= 0x1F) {
             throw parser_error("invalid characters found in string or string is incomplete", ps.line, ps.column);
         }
 
