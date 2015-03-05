@@ -39,6 +39,9 @@ struct format_options {
         escape_multi_byte = 1 << 2
     };
 
+    format_options() noexcept = default;
+    format_options(int indent, int flags = none, int precision = 6) noexcept: flags(flags), indent(indent), precision(precision) {}
+
     int flags = none;
     int indent = 4;
     int precision = 6;

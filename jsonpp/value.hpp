@@ -183,6 +183,25 @@ public:
         return *this;
     }
 
+    std::string type_name() const {
+        switch(storage_type) {
+        case type::array:
+            return "array";
+        case type::string:
+            return "string";
+        case type::object:
+            return "object";
+        case type::number:
+            return "number";
+        case type::boolean:
+            return "boolean";
+        case type::null:
+            return "null";
+        default:
+            return "unknown";
+        }
+    }
+
     void clear() noexcept {
         switch(storage_type) {
         case type::array:
