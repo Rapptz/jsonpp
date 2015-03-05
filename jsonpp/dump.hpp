@@ -23,6 +23,7 @@
 #define JSONPP_DUMP_HPP
 
 #include "type_traits.hpp"
+#include "detail/unicode.hpp"
 #include <string>
 #include <sstream>
 #include <iosfwd>
@@ -35,6 +36,7 @@ struct format_options {
         none = 0,
         allow_nan_inf = 1 << 0,
         minify = 1 << 1,
+        escape_multi_byte = 1 << 2
     };
 
     int flags = none;
@@ -79,54 +81,82 @@ inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
     return out;
 }
 
+namespace detail {
+template<typename OStream>
+inline bool escape_control(OStream& out, char control) {
+    switch(control) {
+    case '"':
+        out << "\\\"";
+        return true;
+    case '\\':
+        out << "\\\\";
+        return true;
+    case '/':
+        out << "\\/";
+        return true;
+    case '\b':
+        out << "\\b";
+        return true;
+    case '\f':
+        out << "\\f";
+        return true;
+    case '\n':
+        out << "\\n";
+        return true;
+    case '\r':
+        out << "\\r";
+        return true;
+    case '\t':
+        out << "\\t";
+        return true;
+    default:
+        return false;
+    }
+}
+
+template<typename OStream>
+inline OStream& escape_str(OStream& out, const std::u16string& utf16) {
+    auto fill = out.fill();
+    auto width = out.width();
+    auto flags = out.flags();
+    out << '"';
+    for(auto&& c : utf16) {
+        if(c <= 0x7F) {
+            if(escape_control(out, static_cast<char>(c))) {
+                continue;
+            }
+            out << static_cast<char>(c);
+        }
+        else {
+            // prepare stream
+            out << "\\u";
+            out.width(4);
+            out.fill('0');
+            out.setf(out.hex, out.basefield);
+            out << c;
+            out.width(width);
+            out.fill(fill);
+            out.flags(flags);
+        }
+    }
+    out << '"';
+    return out;
+}
+} // detail
+
 template<typename OStream, typename T, EnableIf<is_string<T>> = 0>
-inline OStream& dump(OStream& out, const T& t, format_options = {}) {
+inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
+    bool escape = (opt.flags & opt.escape_multi_byte) == opt.escape_multi_byte;
+    if(escape) {
+        return detail::escape_str(out, detail::utf8_to_utf16(t));
+    }
     out << '"';
     for(auto&& c : t) {
-        switch(c) {
-        case '"':
-            out << "\\\"";
-            break;
-        case '\\':
-            out << "\\\\";
-            break;
-        case '/':
-            out << "\\/";
-            break;
-        case '\b':
-            out << "\\b";
-            break;
-        case '\f':
-            out << "\\f";
-            break;
-        case '\n':
-            out << "\\n";
-            break;
-        case '\r':
-            out << "\\r";
-            break;
-        case '\t':
-            out << "\\t";
-            break;
-        default:
-            if(c == 0x7F || static_cast<unsigned char>(c) < 0x20) {
-                // prepare the stream state for formatting.
-                out << "\\u";
-                auto fill = out.fill();
-                auto width = out.width();
-                auto flags = out.flags();
-                out.width(4);
-                out.fill('0');
-                out.flags(flags | out.hex);
-                out << (c & 0xFF);
-                out.width(width);
-                out.fill(fill);
-                out.flags(flags);
-            }
-            else {
-                out << c;
-            }
-            break;
+        if(detail::escape_control(out, c)) {
+            continue;
+        }
+        else {
+            out << c;
         }
     }
     out << '"';
