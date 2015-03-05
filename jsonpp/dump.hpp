@@ -41,6 +41,7 @@ struct format_options {
 
     int flags = none;
     int indent = 4;
+    int precision = 6;
     int depth = 0;
 };
 
@@ -75,7 +76,7 @@ inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
         return out;
     }
     auto precision = out.precision();
-    out.precision(17);
+    out.precision(opt.precision);
     out << t;
     out.precision(precision);
     return out;
