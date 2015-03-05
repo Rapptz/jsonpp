@@ -256,6 +256,13 @@ inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
     out << '}';
     return out;
 }
+
+template<typename T>
+inline std::string dump_string(const T& value, format_options opt = {}) {
+    std::ostringstream ss;
+    dump(ss, value, opt);
+    return ss.str();
+}
 } // v1
 } // json
 
