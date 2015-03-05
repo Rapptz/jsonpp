@@ -1,71 +1,49 @@
 #!/usr/bin/env python
 
-import ninja_syntax
-import os, sys, glob
-import itertools
+import sen as senpai
+import os, sys
 import argparse
 
-# utilities
-def flags(*args):
-    return ' '.join(itertools.chain(*args))
-
-def includes(l):
-    return ['-I"{}"'.format(x) for x in l]
-
-def dependencies(l):
-    return ['-isystem "{}"'.format(x) for x in l]
-
 # command line stuff
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(usage='%(prog)s [options...]')
 parser.add_argument('--debug', action='store_true', help='compile with debug flags')
 parser.add_argument('--cxx', metavar='<compiler>', help='compiler name to use (default: g++)', default='g++')
+parser.add_argument('--quiet', '-q', action='store_true', help='suppress warning output')
+parser.add_argument('--use-libcxx', action='store_true', help='compile with libc++')
+parser.add_argument('--libcxx-include-dir', help='the include directory for libc++', default='/usr/include/c++/v1/')
+parser.add_argument('--libcxx-lib-dir', help='the lib directory for libc++', default='/usr/lib/')
 args = parser.parse_args()
 
-# general variables
-include = [ '.', 'jsonpp' ]
-depends = ['tests', os.path.join('Catch', 'single_include')]
-cxxflags = [ '-Wall', '-Werror', '-Wextra', '-pedantic', '-std=c++11' ]
+project = senpai.Project(name='jsonpp', compiler=senpai.compiler(args.cxx), builddir='bin', objdir='obj')
+project.includes = ['.', 'jsonpp']
+project.dependencies = [os.path.join('Catch', 'single_include')]
+S = senpai.Executable(name='tests', target='build', run='run')
+S.files = senpai.files_from('tests', '*.cpp')
+
+def warning(string):
+    if not args.quiet:
+        print('warning: {}'.format(string))
+
+# configuration
+if 'g++' not in args.cxx:
+    warning('compiler not explicitly supported: {}'.format(args.cxx))
+
+cxxflags = ['-Wall', '-Wextra', '-pedantic', '-std=c++11', '-Wno-switch']
 
 if args.debug:
     cxxflags.extend(['-g', '-O0', '-DDEBUG'])
 else:
     cxxflags.extend(['-DNDEBUG', '-O3'])
 
-builddir = 'bin'
-objdir = 'obj'
-tests = os.path.join(builddir, 'tests')
+if args.cxx == 'clang++':
+    cxxflags.extend(['-Wno-constexpr-not-const', '-Wno-unused-value', '-Wno-mismatched-tags'])
 
-def object_file(f):
-    (root, ext) = os.path.splitext(f)
-    return os.path.join(objdir, root + '.o')
+if args.use_libcxx:
+    project.libraries = ['c++']
+    cxxflags.append('-stdlib=libc++')
+    project.dependencies.append(args.libcxx_include_dir)
+    project.library_paths = [args.libcxx_lib_dir]
 
-# ninja file
-ninja = ninja_syntax.Writer(open('build.ninja', 'w'))
-
-# variables
-ninja.variable('ninja_required_version', '1.3')
-ninja.variable('builddir', 'bin')
-ninja.variable('cxx', args.cxx)
-ninja.variable('cxxflags', flags(cxxflags + includes(include) + dependencies(depends)))
-
-# rules
-ninja.rule('bootstrap', command = ' '.join(['python'] + sys.argv), generator = True)
-ninja.rule('compile', command = '$cxx -MMD -MF $out.d -c $cxxflags $in -o $out',
-                      deps = 'gcc', depfile = '$out.d',
-                      description = 'Compiling $in to $out')
-ninja.rule('link', command = '$cxx $cxxflags $in -o $out', description = 'Creating $out')
-ninja.rule('runner', command = tests)
-
-# builds
-ninja.build('build.ninja', 'bootstrap', implicit = sys.argv[0])
-
-object_files = []
-for f in glob.glob('tests/*.cpp'):
-    obj = object_file(f)
-    object_files.append(obj)
-    ninja.build(obj, 'compile', inputs = f)
-
-ninja.build(tests, 'link', inputs = object_files)
-ninja.build('install', 'phony', inputs = tests)
-ninja.build('run', 'runner', implicit = 'install')
-ninja.default('run')
+project.flags = cxxflags
+project.add_executable(S)
+project.dump(open('build.ninja', 'w'))
