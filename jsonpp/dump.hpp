@@ -30,39 +30,44 @@
 
 namespace json {
 inline namespace v1 {
-struct option {
+struct format_options {
     enum : int {
         none = 0,
         allow_nan_inf = 1 << 0,
-        minify = 1 << 1
+        minify = 1 << 1,
     };
+
+    int flags = none;
+    int indent = 4;
+    int depth = 0;
 };
 
 namespace detail {
 template<typename OStream>
-inline void indent_by(OStream& out, int indent, int depth) {
+inline void indent(OStream& out, const format_options& opt) {
     out << '\n';
-    for(int i = 0; i < (indent * depth); ++i) {
+    for(int i = 0; i < (opt.indent * opt.depth); ++i) {
         out << ' ';
     }
 }
+} // detail
 
 
 template<typename OStream, typename T, EnableIf<is_null<T>> = 0>
-inline OStream& dump(OStream& out, const T&, int /* indent */, int /* opts */, int /* depth */) {
+inline OStream& dump(OStream& out, const T&, format_options = {}) {
     out << "null";
     return out;
 }
 
 template<typename OStream, typename T, EnableIf<is_bool<T>> = 0>
-inline OStream& dump(OStream& out, const T& t, int /* indent */, int /* opts */, int /* depth */) {
+inline OStream& dump(OStream& out, const T& t, format_options = {}) {
     out << (t ? "true" : "false");
     return out;
 }
 
 template<typename OStream, typename T, EnableIf<is_number<T>> = 0>
-inline OStream& dump(OStream& out, const T& t, int /* indent */, int opts, int /* depth */) {
-    if((opts & option::allow_nan_inf) != option::allow_nan_inf && (std::isnan(t) || std::isinf(t))) {
+inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
+    if((opt.flags & opt.allow_nan_inf) != opt.allow_nan_inf && (std::isnan(t) || std::isinf(t))) {
         // stream null instead if nan is found
         out << "null";
         return out;
@@ -75,7 +80,7 @@ inline OStream& dump(OStream& out, const T& t, int /* indent */, int opts, int /
 }
 
 template<typename OStream, typename T, EnableIf<is_string<T>> = 0>
-inline OStream& dump(OStream& out, const T& t, int /* indent */, int /* opts */, int /* depth */) {
+inline OStream& dump(OStream& out, const T& t, format_options = {}) {
     out << '"';
     for(auto&& c : t) {
         switch(c) {
@@ -129,9 +134,9 @@ inline OStream& dump(OStream& out, const T& t, int /* indent */, int /* opts */,
 }
 
 template<typename OStream, typename T, EnableIf<is_array<T>> = 0>
-inline OStream& dump(OStream& out, const T& t, int indent, int opts, int depth) {
-    bool prettify = (opts & option::minify) != option::minify;
-    depth += prettify;
+inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
+    bool prettify = (opt.flags & opt.minify) != opt.minify;
+    opt.depth += prettify;
     out << '[';
 
     using std::begin;
@@ -145,17 +150,17 @@ inline OStream& dump(OStream& out, const T& t, int indent, int opts, int depth) 
         }
 
         if(prettify) {
-            indent_by(out, indent, depth);
+            detail::indent(out, opt);
         }
 
-        dump(out, *first, indent, opts, depth);
+        dump(out, *first, opt);
         first_pass = false;
     }
 
     if(prettify) {
-        --depth;
+        --opt.depth;
         if(not first_pass) {
-            indent_by(out, indent, depth);
+            detail::indent(out, opt);
         }
     }
 
@@ -163,20 +168,22 @@ inline OStream& dump(OStream& out, const T& t, int indent, int opts, int depth) 
     return out;
 }
 
+namespace detail {
 template<typename OStream, typename T, EnableIf<std::is_arithmetic<T>> = 0>
-inline void key(OStream& out, const T& t) {
+inline void key(OStream& out, const T& t, const format_options&) {
     out << '"' << std::to_string(t) << '"';
 }
 
 template<typename OStream, typename T, DisableIf<std::is_arithmetic<T>> = 0>
-inline void key(OStream& out, const T& t) {
-    dump(out, t, 0, 0, 0);
+inline void key(OStream& out, const T& t, const format_options& opt) {
+    dump(out, t, opt);
 }
+} // detail
 
 template<typename OStream, typename T, EnableIf<is_object<T>> = 0>
-inline OStream& dump(OStream& out, const T& t, int indent, int opts, int depth) {
-    bool prettify = (opts & option::minify) != option::minify;
-    depth += prettify;
+inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
+    bool prettify = (opt.flags & format_options::minify) != format_options::minify;
+    opt.depth += prettify;
     out << '{';
 
     using std::begin;
@@ -194,37 +201,30 @@ inline OStream& dump(OStream& out, const T& t, int indent, int opts, int depth) 
         }
 
         if(prettify) {
-            indent_by(out, indent, depth);
+            detail::indent(out, opt);
         }
 
-        key(out, elem.first);
+        detail::key(out, elem.first, opt);
         out << ':';
 
         if(prettify) {
             out << ' ';
         }
 
-        dump(out, elem.second, indent, opts, depth);
+        dump(out, elem.second, opt);
         first_pass = false;
     }
 
     if(prettify) {
-        --depth;
+        --opt.depth;
 
         if(not first_pass) {
-            indent_by(out, indent, depth);
+            detail::indent(out, opt);
         }
     }
 
     out << '}';
     return out;
-}
-} // detail
-
-template<typename OStream, typename T>
-inline OStream& dump(OStream& out, const T& t, int indent = 4, int opts = option::none) {
-    using detail::dump;
-    return dump(out, t, indent, opts, 0);
 }
 } // v1
 } // json

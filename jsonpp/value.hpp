@@ -305,21 +305,20 @@ public:
     }
 
     template<typename OStream>
-    friend OStream& dump(OStream& out, const value& val, int indent, int opts, int depth) {
-        using detail::dump;
+    friend OStream& dump(OStream& out, const value& val, format_options opt = {}) {
         switch(val.storage_type) {
         case type::array:
-            return dump(out, *val.storage.arr, indent, opts, depth);
+            return dump(out, *val.storage.arr, opt);
         case type::string:
-            return dump(out, *val.storage.str, indent, opts, depth);
+            return dump(out, *val.storage.str, opt);
         case type::object:
-            return dump(out, *val.storage.obj, indent, opts, depth);
+            return dump(out, *val.storage.obj, opt);
         case type::boolean:
-            return dump(out, val.storage.boolean, indent, opts, depth);
+            return dump(out, val.storage.boolean, opt);
         case type::number:
-            return dump(out, val.storage.number, indent, opts, depth);
+            return dump(out, val.storage.number, opt);
         case type::null:
-            return dump(out, nullptr, indent, opts, depth);
+            return dump(out, nullptr, opt);
         default:
             return out;
         }
