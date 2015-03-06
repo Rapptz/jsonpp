@@ -1,0 +1,14 @@
+.. _doc_parsing:
+
+Parsing JSON
+=================
+
+jsonpp provides an API that allows you to parse JSON in a nice manner. It's inspired by the Python
+`json module <https://docs.python.org/2/library/json.html>`_.
+
+.. _doc_parsing_basic:
+
+Basic Parsing
+-----------------
+
+The most basic form of parsing is to use the

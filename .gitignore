@@ -1,5 +1,0 @@
-*.pyc
-bin/*
-obj/*
-*.ninja
-*.exe

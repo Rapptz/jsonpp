@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &mdash; jsonpp 0.9.0-beta documentation</title>
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9.0-beta',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="jsonpp 0.9.0-beta documentation" href="../index.html" />
+    <link rel="next" title="API Reference" href="api.html" />
+    <link rel="prev" title="Welcome to jsonpp’s documentation!" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="api.html" title="API Reference"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to jsonpp’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">jsonpp 0.9.0-beta documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installation">
+<span id="doc-install"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>There is no immediate installation step when using this library. As mentioned in
+the project&#8217;s README, the entire thing is header-only. However there are some steps
+to help make integration easier if needed.</p>
+<p>To begin, you can obtain the source by doing a clone:</p>
+<div class="highlight-cpp"><div class="highlight"><pre>$ git clone --recursive https://github.com/Rapptz/jsonpp.git
+</pre></div>
+</div>
+<div class="section" id="creating-a-single-header">
+<span id="doc-single-header"></span><h2>Creating A Single Header<a class="headerlink" href="#creating-a-single-header" title="Permalink to this headline">¶</a></h2>
+<p>The main repository has a file called <code class="docutils literal"><span class="pre">single.py</span></code> which creates a single file for your convenience without having to copy the entire directory source.</p>
+<p>Basic invocation is just</p>
+<div class="highlight-cpp"><div class="highlight"><pre>$ python single.py
+</pre></div>
+</div>
+<p>By default, it creates a file called <code class="docutils literal"><span class="pre">jsonpp.hpp</span></code> in the root directory. You can rename the file and location by passing the <code class="docutils literal"><span class="pre">-o</span></code> option like so:</p>
+<div class="highlight-cpp"><div class="highlight"><pre>$ python single.py -o single.hpp
+</pre></div>
+</div>
+<p>The single header contains no dependencies so it&#8217;s for maximal ease of including.</p>
+</div>
+<div class="section" id="building-documentation">
+<span id="doc-make-docs"></span><h2>Building Documentation<a class="headerlink" href="#building-documentation" title="Permalink to this headline">¶</a></h2>
+<p>Creating an offline back-up of the documentation is pretty simple. The only requirement to build the
+documentation is to have <a class="reference external" href="http://sphinx-doc.org/">Sphinx</a> version 1.2.3 or higher.</p>
+<p>After obtaining Sphinx, just run the make command to whatever format you want:</p>
+<div class="highlight-cpp"><div class="highlight"><pre>$ cd docs
+$ make html
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#creating-a-single-header">Creating A Single Header</a></li>
+<li><a class="reference internal" href="#building-documentation">Building Documentation</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../index.html"
+                        title="previous chapter">Welcome to jsonpp&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="next chapter">API Reference</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/doc/install.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="api.html" title="API Reference"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to jsonpp’s documentation!"
+             >previous</a> |</li>
+        <li><a href="../index.html">jsonpp 0.9.0-beta documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Rapptz.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>

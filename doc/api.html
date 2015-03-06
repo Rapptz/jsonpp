@@ -1,0 +1,470 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>API Reference &mdash; jsonpp 0.9.0-beta documentation</title>
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9.0-beta',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="jsonpp 0.9.0-beta documentation" href="../index.html" />
+    <link rel="prev" title="Installation" href="install.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="install.html" title="Installation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">jsonpp 0.9.0-beta documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="api-reference">
+<span id="doc-api"></span><h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
+<p>The API of jsonpp is largely inspired by the ease of use of the Python
+<a class="reference external" href="https://docs.python.org/2/library/json.html">json module</a>. I considered the API of that module to be easy
+enough to use and understand in many ways but not in others. The goal of this library was to fix some of the
+issues with the json module and to allow the same ease of use in a C++ setting with static typing.</p>
+<div class="section" id="error-handling">
+<span id="doc-api-error"></span><h2>Error Handling<a class="headerlink" href="#error-handling" title="Permalink to this headline">¶</a></h2>
+<p>The parsing part of the library throws an error called <a class="reference internal" href="#_GCPPN4json12parser_errorE" title="json::parser_error"><code class="xref gcpp gcpp-class docutils literal"><span class="pre">parser_error</span></code></a>.</p>
+<dl class="class">
+<dt id="_GCPPN4json12parser_errorE">
+<em class="property">class </em><code class="descclassname"></code><code class="descname">parser_error</code> : <em class="property">public</em> <code class="descclassname">std::</code><code class="descname">exception</code><a class="headerlink" href="#_GCPPN4json12parser_errorE" title="Permalink to this definition">¶</a></dt>
+<dd><p>The exception type used to report parsing errors.</p>
+<dl class="function">
+<dt id="_GCPPN4json12parser_error12parser_errorERKNSt6stringEjj">
+<code class="descclassname"></code><code class="descname">parser_error</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>str</em>, unsigned <em>line</em>, unsigned <em>column</em><span class="sig-paren">)</span><a class="headerlink" href="#_GCPPN4json12parser_error12parser_errorERKNSt6stringEjj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a parser error.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>str</strong> &#8211; The error string.</li>
+<li><strong>line</strong> &#8211; The line the error occurred in.</li>
+<li><strong>column</strong> &#8211; The column the error occurred in.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPKN4json12parser_error4whatEv">
+<em class="property">const</em> char *<code class="descclassname"></code><code class="descname">what</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em> <em class="property">noexcept</em><a class="headerlink" href="#_GCPPKN4json12parser_error4whatEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the string representation of the error.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="json-value">
+<span id="doc-api-value"></span><h2>JSON Value<a class="headerlink" href="#json-value" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_GCPPN4json5valueE">
+<em class="property">class </em><code class="descclassname"></code><code class="descname">value</code><a class="headerlink" href="#_GCPPN4json5valueE" title="Permalink to this definition">¶</a></dt>
+<dd><p>The class that represents a JSON value according to the official JSON spec, <a class="reference external" href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf">ECMA-404</a>.</p>
+<p>Throughout the documentation of this class, there are six different types that
+the <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value"><code class="xref gcpp gcpp-class docutils literal"><span class="pre">value</span></code></a> class can hold:</p>
+<ul class="simple">
+<li>null</li>
+<li>object</li>
+<li>array</li>
+<li>string</li>
+<li>boolean</li>
+<li>number</li>
+</ul>
+<p>It can only hold a single one of these types at a time.</p>
+<dl class="function">
+<dt id="_GCPPN4json5value5valueEv">
+<code class="descclassname"></code><code class="descname">value</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">noexcept</em><a class="headerlink" href="#_GCPPN4json5value5valueEv" title="Permalink to this definition">¶</a></dt>
+<dt id="_GCPPN4json5value5valueE4null">
+<code class="descclassname"></code><code class="descname">value</code><span class="sig-paren">(</span><a class="reference internal" href="#_GCPPN4json4nullE" title="json::null">null</a><span class="sig-paren">)</span> <em class="property">noexcept</em><a class="headerlink" href="#_GCPPN4json5value5valueE4null" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value"><code class="xref gcpp gcpp-class docutils literal"><span class="pre">value</span></code></a> with a null value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Post condition:</th><td class="field-body">Internal type is null.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPN4json5value5valueEd">
+<code class="descclassname"></code><code class="descname">value</code><span class="sig-paren">(</span>double <em>val</em><span class="sig-paren">)</span> <em class="property">noexcept</em><a class="headerlink" href="#_GCPPN4json5value5valueEd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value"><code class="xref gcpp gcpp-class docutils literal"><span class="pre">value</span></code></a> with the number value provided.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Post condition:</th><td class="field-body">Internal type is number.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPN4json5value5valueEb">
+<code class="descclassname"></code><code class="descname">value</code><span class="sig-paren">(</span>bool <em>b</em><span class="sig-paren">)</span> <em class="property">noexcept</em><a class="headerlink" href="#_GCPPN4json5value5valueEb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value"><code class="xref gcpp gcpp-class docutils literal"><span class="pre">value</span></code></a> with the boolean value provided.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Post condition:</th><td class="field-body">Internal type is boolean.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPN4json5value5valueERKNSt6stringE">
+<code class="descclassname"></code><code class="descname">value</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>str</em><span class="sig-paren">)</span><a class="headerlink" href="#_GCPPN4json5value5valueERKNSt6stringE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value"><code class="xref gcpp gcpp-class docutils literal"><span class="pre">value</span></code></a> with the string value provided.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Post condition:</th><td class="field-body">Internal type is string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPN4json5value5valueERK5array">
+<code class="descclassname"></code><code class="descname">value</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_GCPPN4json5arrayE" title="json::array">array</a> &amp;<em>arr</em><span class="sig-paren">)</span><a class="headerlink" href="#_GCPPN4json5value5valueERK5array" title="Permalink to this definition">¶</a></dt>
+<dt id="_GCPPN4json5value5valueENSt16initializer_listI5valueEE">
+<code class="descclassname"></code><code class="descname">value</code><span class="sig-paren">(</span>std::initializer_list&lt;<a class="reference internal" href="#_GCPPN4json5valueE" title="json::value">value</a>&gt; <em>l</em><span class="sig-paren">)</span><a class="headerlink" href="#_GCPPN4json5value5valueENSt16initializer_listI5valueEE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value"><code class="xref gcpp gcpp-class docutils literal"><span class="pre">value</span></code></a> with the array value provided.</p>
+<p>This allows you to use initializer lists to construct a <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value"><code class="xref gcpp gcpp-class docutils literal"><span class="pre">value</span></code></a> directly. e.g.</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="n">json</span><span class="o">::</span><span class="n">value</span> <span class="n">x</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s">&quot;hello&quot;</span><span class="p">,</span> <span class="k">nullptr</span> <span class="p">};</span> <span class="c1">// OK</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Post condition:</th><td class="field-body">Internal type is array.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPN4json5value5valueERK6object">
+<code class="descclassname"></code><code class="descname">value</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_GCPPN4json6objectE" title="json::object">object</a> &amp;<em>obj</em><span class="sig-paren">)</span><a class="headerlink" href="#_GCPPN4json5value5valueERK6object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value"><code class="xref gcpp gcpp-class docutils literal"><span class="pre">value</span></code></a> with the object value provided.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Post condition:</th><td class="field-body">Internal type is object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPN4json5value5valueERK1T">
+<code class="descclassname"></code><code class="descname">value</code><span class="sig-paren">(</span><em class="property">const</em> T &amp;<em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#_GCPPN4json5value5valueERK1T" title="Permalink to this definition">¶</a></dt>
+<dt id="_GCPPN4json5valueaSERK1T">
+<a class="reference internal" href="#_GCPPN4json5valueE" title="json::value">value</a> &amp;<code class="descclassname"></code><code class="descname">operator=</code><span class="sig-paren">(</span><em class="property">const</em> T &amp;<em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#_GCPPN4json5valueaSERK1T" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value"><code class="xref gcpp gcpp-class docutils literal"><span class="pre">value</span></code></a> from a <em>serialisable</em> type. The Internal
+type depends on the internal type of the resulting serialised object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPN4json5value5valueERK5value">
+<code class="descclassname"></code><code class="descname">value</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value">value</a> &amp;<em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#_GCPPN4json5value5valueERK5value" title="Permalink to this definition">¶</a></dt>
+<dt id="_GCPPN4json5valueaSERK5value">
+<a class="reference internal" href="#_GCPPN4json5valueE" title="json::value">value</a> &amp;<code class="descclassname"></code><code class="descname">operator=</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value">value</a> &amp;<em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#_GCPPN4json5valueaSERK5value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies one value to another value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Post condition:</th><td class="field-body">The resulting internal type is the same as the <code class="docutils literal"><span class="pre">other</span></code> parameter.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPN4json5value5valueERR5value">
+<code class="descclassname"></code><code class="descname">value</code><span class="sig-paren">(</span><a class="reference internal" href="#_GCPPN4json5valueE" title="json::value">value</a> &amp;&amp;<em>other</em><span class="sig-paren">)</span> <em class="property">noexcept</em><a class="headerlink" href="#_GCPPN4json5value5valueERR5value" title="Permalink to this definition">¶</a></dt>
+<dt id="_GCPPN4json5valueaSERR5value">
+<a class="reference internal" href="#_GCPPN4json5valueE" title="json::value">value</a> &amp;<code class="descclassname"></code><code class="descname">operator=</code><span class="sig-paren">(</span><a class="reference internal" href="#_GCPPN4json5valueE" title="json::value">value</a> &amp;&amp;<em>other</em><span class="sig-paren">)</span> <em class="property">noexcept</em><a class="headerlink" href="#_GCPPN4json5valueaSERR5value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Moves one value to another value. The ownership of the contents owned by
+<code class="docutils literal"><span class="pre">other</span></code> are transferred over.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Post condition:</th><td class="field-body">The resulting internal type is the same as the <code class="docutils literal"><span class="pre">other</span></code> parameter.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPKN4json5value9type_nameEv">
+std::string <code class="descclassname"></code><code class="descname">type_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_GCPPKN4json5value9type_nameEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a string representation of the internal type.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="47%" />
+<col width="53%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Internal Type</th>
+<th class="head">Returned String</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>array</td>
+<td>&#8220;array&#8221;</td>
+</tr>
+<tr class="row-odd"><td>string</td>
+<td>&#8220;string&#8221;</td>
+</tr>
+<tr class="row-even"><td>object</td>
+<td>&#8220;object&#8221;</td>
+</tr>
+<tr class="row-odd"><td>number</td>
+<td>&#8220;number&#8221;</td>
+</tr>
+<tr class="row-even"><td>boolean</td>
+<td>&#8220;boolean&#8221;</td>
+</tr>
+<tr class="row-odd"><td>null</td>
+<td>&#8220;null&#8221;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPN4json5value5clearEv">
+void <code class="descclassname"></code><code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">noexcept</em><a class="headerlink" href="#_GCPPN4json5value5clearEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes all internal storage being held.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Post condition:</th><td class="field-body">Internal type is null.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPKN4json5value2isI1TEEv">
+bool <code class="descclassname"></code><code class="descname">is</code>&lt;T&gt;<span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em> <em class="property">noexcept</em><a class="headerlink" href="#_GCPPKN4json5value2isI1TEEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the internal type is one of the C++ types provided.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="77%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Internal Type</td>
+<td>Valid C++ Types</td>
+</tr>
+<tr class="row-even"><td>array</td>
+<td><a class="reference internal" href="#_GCPPN4json5arrayE" title="json::array"><code class="xref gcpp gcpp-type docutils literal"><span class="pre">json::array</span></code></a></td>
+</tr>
+<tr class="row-odd"><td>object</td>
+<td><a class="reference internal" href="#_GCPPN4json6objectE" title="json::object"><code class="xref gcpp gcpp-type docutils literal"><span class="pre">json::object</span></code></a></td>
+</tr>
+<tr class="row-even"><td>null</td>
+<td><a class="reference internal" href="#_GCPPN4json4nullE" title="json::null"><code class="xref gcpp gcpp-type docutils literal"><span class="pre">json::null</span></code></a></td>
+</tr>
+<tr class="row-odd"><td>boolean</td>
+<td><code class="docutils literal"><span class="pre">bool</span></code></td>
+</tr>
+<tr class="row-even"><td>number</td>
+<td>All integral types such as <code class="docutils literal"><span class="pre">int</span></code> and <code class="docutils literal"><span class="pre">float</span></code>.</td>
+</tr>
+<tr class="row-odd"><td>string</td>
+<td><code class="docutils literal"><span class="pre">const</span> <span class="pre">char*</span></code> or <code class="docutils literal"><span class="pre">std::string</span></code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Anything else would return <code class="docutils literal"><span class="pre">false</span></code> but due to <a class="reference external" href="https://github.com/Rapptz/jsonpp/issues/10">#10</a> a compiler
+error occurs instead.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPKN4json5value2asI1TEEv">
+T <code class="descclassname"></code><code class="descname">as</code>&lt;T&gt;<span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em> <em class="property">noexcept</em><a class="headerlink" href="#_GCPPKN4json5value2asI1TEEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a copy of the internal value being held. For type equivalences,
+check the table for <a class="reference internal" href="#_GCPPKN4json5value2isI1TEEv" title="json::value::is&lt;T&gt;"><code class="xref gcpp gcpp-func docutils literal"><span class="pre">is&lt;T&gt;()</span></code></a>.</p>
+<p>Similarly, an invalid type should throw an exception but due to <a class="reference external" href="https://github.com/Rapptz/jsonpp/issues/10">#10</a> a
+compiler error is issued instead.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This function uses the <a class="reference external" href="http://en.cppreference.com/w/cpp/error/assert">assert</a> macro to check the preconditions.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Precondition:</th><td class="field-body"><a class="reference internal" href="#_GCPPKN4json5value2isI1TEEv" title="json::value::is&lt;T&gt;"><code class="xref gcpp gcpp-func docutils literal"><span class="pre">is&lt;T&gt;()</span></code></a> must return <code class="docutils literal"><span class="pre">true</span></code>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPKN4json5value2asI1TEERR1T">
+T <code class="descclassname"></code><code class="descname">as</code>&lt;T&gt;<span class="sig-paren">(</span>T &amp;&amp;<em>default</em><span class="sig-paren">)</span> <em class="property">const</em> <em class="property">noexcept</em><a class="headerlink" href="#_GCPPKN4json5value2asI1TEERR1T" title="Permalink to this definition">¶</a></dt>
+<dd><p>Similar to <a class="reference internal" href="#_GCPPKN4json5value2asI1TEEv" title="json::value::as&lt;T&gt;"><code class="xref gcpp gcpp-func docutils literal"><span class="pre">as&lt;T&gt;()</span></code></a> but if <a class="reference internal" href="#_GCPPKN4json5value2isI1TEEv" title="json::value::is&lt;T&gt;"><code class="xref gcpp gcpp-func docutils literal"><span class="pre">is&lt;T&gt;()</span></code></a> is false, then the
+default value is returned.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPKN4json5valueixERKNSt6stringE">
+<a class="reference internal" href="#_GCPPN4json5valueE" title="json::value">value</a> <code class="descclassname"></code><code class="descname">operator[]</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>str</em><span class="sig-paren">)</span> <em class="property">const</em> <em class="property">noexcept</em><a class="headerlink" href="#_GCPPKN4json5valueixERKNSt6stringE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accesses the object at a given string key. If the <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value"><code class="xref gcpp gcpp-class docutils literal"><span class="pre">value</span></code></a> internal type
+is not <a class="reference internal" href="#_GCPPN4json6objectE" title="json::object"><code class="xref gcpp gcpp-type docutils literal"><span class="pre">json::object</span></code></a> or the key is not found, then a <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value"><code class="xref gcpp gcpp-class docutils literal"><span class="pre">value</span></code></a> with
+an internal type of <a class="reference internal" href="#_GCPPN4json4nullE" title="json::null"><code class="xref gcpp gcpp-type docutils literal"><span class="pre">json::null</span></code></a> is returned instead.</p>
+<p>Example:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="n">json</span><span class="o">::</span><span class="n">value</span> <span class="n">x</span> <span class="o">=</span> <span class="n">json</span><span class="o">::</span><span class="n">object</span><span class="p">{</span>
+    <span class="p">{</span> <span class="s">&quot;key&quot;</span><span class="p">,</span> <span class="mi">10</span> <span class="p">},</span> <span class="p">{</span> <span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="s">&quot;bob&quot;</span> <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">x</span><span class="p">[</span><span class="s">&quot;key&quot;</span><span class="p">].</span><span class="n">is</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\n&#39;</span><span class="p">;</span> <span class="c1">// prints 1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="_GCPPKN4json5valueixERK8Integral">
+<a class="reference internal" href="#_GCPPN4json5valueE" title="json::value">value</a> <code class="descclassname"></code><code class="descname">operator[]</code><span class="sig-paren">(</span><em class="property">const</em> Integral &amp;<em>index</em><span class="sig-paren">)</span> <em class="property">const</em> <em class="property">noexcept</em><a class="headerlink" href="#_GCPPKN4json5valueixERK8Integral" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accesses the array at a given index. If the <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value"><code class="xref gcpp gcpp-class docutils literal"><span class="pre">value</span></code></a> internal type
+is not <a class="reference internal" href="#_GCPPN4json5arrayE" title="json::array"><code class="xref gcpp gcpp-type docutils literal"><span class="pre">json::array</span></code></a> or the index is out of bounds, then a <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value"><code class="xref gcpp gcpp-class docutils literal"><span class="pre">value</span></code></a> with
+an internal type of <a class="reference internal" href="#_GCPPN4json4nullE" title="json::null"><code class="xref gcpp gcpp-type docutils literal"><span class="pre">json::null</span></code></a> is returned instead. Index starts at 0.</p>
+<p>Example:</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="n">json</span><span class="o">::</span><span class="n">value</span> <span class="n">x</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span> <span class="p">};</span>
+<span class="k">for</span><span class="p">(</span><span class="kt">unsigned</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">is</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span> <span class="c1">// prints 111111</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<p>Along with the <a class="reference internal" href="#_GCPPN4json5valueE" title="json::value"><code class="xref gcpp gcpp-class docutils literal"><span class="pre">value</span></code></a> class, several type aliases are provided for other JSON types:</p>
+<dl class="type">
+<dt id="_GCPPN4json4nullE">
+<em class="property">type </em><code class="descclassname"></code><code class="descname">null</code><a class="headerlink" href="#_GCPPN4json4nullE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents <code class="docutils literal"><span class="pre">std::nullptr_t</span></code>. For example, <code class="docutils literal"><span class="pre">json::value</span> <span class="pre">x</span> <span class="pre">=</span> <span class="pre">nullptr;</span></code> is valid.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="_GCPPN4json5arrayE">
+<em class="property">type </em><code class="descclassname"></code><code class="descname">array</code><a class="headerlink" href="#_GCPPN4json5arrayE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents <code class="docutils literal"><span class="pre">std::vector&lt;json::value&gt;</span></code>.</p>
+</dd></dl>
+
+<dl class="type">
+<dt id="_GCPPN4json6objectE">
+<em class="property">type </em><code class="descclassname"></code><code class="descname">object</code><a class="headerlink" href="#_GCPPN4json6objectE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents <code class="docutils literal"><span class="pre">std::map&lt;std::string,</span> <span class="pre">json::value&gt;</span></code>.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">API Reference</a><ul>
+<li><a class="reference internal" href="#error-handling">Error Handling</a></li>
+<li><a class="reference internal" href="#json-value">JSON Value</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="install.html"
+                        title="previous chapter">Installation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/doc/api.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="install.html" title="Installation"
+             >previous</a> |</li>
+        <li><a href="../index.html">jsonpp 0.9.0-beta documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Rapptz.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3b2.
+    </div>
+  </body>
+</html>
