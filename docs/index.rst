@@ -11,7 +11,7 @@ User Guide:
    :maxdepth: 2
 
    doc/install
-
+   doc/api
 
 Indices and tables
 ==================
