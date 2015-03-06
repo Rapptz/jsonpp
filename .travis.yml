@@ -38,7 +38,7 @@ before_install:
     - if [ -n "$LIBCXX" -a "$CXX" == "clang++" ]; then sudo ln -sf libc++.so.1.0 libc++.so.1 && cd $cwd; fi
 
     # Otherwise attempt to install g++ 4.9 libstdc++ instead for use in clang
-    - if [ -z "$LIBCXX" -a "$CXX" == "clang++" ]; then sudo apt-get -qq g++-4.9; fi
+    - if [ -z "$LIBCXX" -a "$CXX" == "clang++" ]; then sudo apt-get install -qq g++-4.9; fi
 
 install:
     - cd "$MAIN_PATH"
