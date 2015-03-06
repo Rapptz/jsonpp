@@ -17,6 +17,13 @@ jsonpp is licensed with the MIT license.
 - Decently fast.
 - No dependencies, only the standard library and a C++11 compiler.
 
+## Documentation
+
+Documentation is an on going process and can be found [here][docs]. Amongst documentation you
+can also find examples.
+
+[docs]: http://rapptz.github.io/jsonpp
+
 ## Example usage
 
 #### Parsing
