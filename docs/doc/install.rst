@@ -1,4 +1,3 @@
-.. default-domain:: gcpp
 .. _doc-install:
 
 Installation
