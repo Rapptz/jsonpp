@@ -216,3 +216,44 @@ Along with the :class:`value` class, several type aliases are provided for other
 .. type:: object
 
     Represents ``std::map<std::string, json::value>``.
+
+.. _doc_api_parsing:
+
+Parsing JSON
+----------------
+
+The API for parsing is composed of two functions and a class. The class does not have to actually be instantiated in the
+usual cases since the two free functions handle the creation of the parser for you.
+
+.. class:: parser
+
+    Represents a JSON parser. This typically doesn't need to be instantiated and you should use :func:`json::parse` instead.
+
+    The parser is not destructive and is implemented as a recursive descent parser.
+
+    .. function:: parser(const char* str) noexcept
+
+        Creates a parser from a string already in memory. The lifetime of the string must be longer than the actual
+        :class:`parser` object. The string must be a valid JSON string or an exception will be thrown when parsing.
+        The constructor does not parse anything -- it just sets up the parser state.
+    .. function:: void parse(value& val)
+
+        Parses the JSON string. If an error occurs during parsing then an error is thrown. Currently there are a couple
+        of assumptions on the parsing state:
+
+        - The internal string is UTF-8 encoded.
+        - ``nan`` and ``inf`` are allowed.
+        - Comments are disallowed currently. See :issue:`3`.
+
+        The rest follows the |json|_ specification.
+
+        :throws parser_error: Thrown if a parsing error has occurred.
+
+.. function:: void parse(const std::string& str, value& val)
+
+    Parses a JSON string. Equivalent to constructing a :class:`parser` and then using the :func:`parser::parse` function.
+.. function:: void parse(std::istream& in, value& val)
+
+    Retrieves the :cpp:`rdbuf <io/basic_ios/rdbuf>` of the :cpp:`std::istream <io/basic_istream>` to construct a string
+    and parses the resulting string as JSON.
+
