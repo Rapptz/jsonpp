@@ -257,3 +257,74 @@ usual cases since the two free functions handle the creation of the parser for y
     Retrieves the :cpp:`rdbuf <io/basic_ios/rdbuf>` of the :cpp:`std::istream <io/basic_istream>` to construct a string
     and parses the resulting string as JSON.
 
+.. _doc_api_dumping:
+
+Dumping JSON
+---------------
+
+There's an API in place to dump (i.e. serialise) C++ objects into JSON constructs.
+
+.. class:: format_options
+
+    This class specifies the behaviour used when dumping JSON with the :func:`json::dump` interface.
+
+    .. enum:: flag_type : int
+
+        A regular enum (i.e. not an ``enum class``) that specifies flags for use with the :member:`flags` member.
+
+        .. enumerator:: none
+
+            The default value for :member:`flags`. Specifies that no special formatting will occur.
+        .. enumerator:: allow_nan_inf
+
+            Allow ``nan`` and ``inf`` values to be printed in the resulting JSON. If this is not set and
+            ``nan`` and ``inf`` are spotted, then "null" is printed instead.
+        .. enumerator:: minify
+
+            Minifies the resulting JSON by suppressing newlines from being printed and indentation.
+        .. enumerator:: escape_multi_byte
+
+            UTF-8 codepoints that are greater than ``0x7F`` will be escaped into their proper UTF-16
+            codepoint with surrogate pairs included.
+
+    .. member:: int flags
+
+        Specifies the special format behaviour for the family of :func:`json::dump` functions. Defaults to
+        :enum:`none`.
+
+    .. member:: int indent
+
+        Specifies how many spaces to indent when pretty printing the output. e.g. with an indent value of
+        ``4`` then the JSON ``{ "key": 10 }`` would be dumped as: ::
+
+            {
+                "key": 10
+            }
+
+        Defaults to 4.
+    .. member:: int precision
+
+        The default precision when printing number types. The default value is 6.
+
+
+.. function:: OStream& dump(OStream& out, const T& t, const format_options& options)
+
+    Dumps a C++ object to JSON with the specified options and a valid :cpp:`std::ostream <io/basic_ostream>` instance
+    such as ``std::cout`` or ``std::ofstream``.
+
+    - If the type is a string, then it will be printed as a string such as ``"Hello"``.
+    - If the type is :type:`null`, then it will print ``null``.
+    - If the type is an integral type, then it will print it with the specified precision of :member:`format_options::precision`.
+    - If the type is a container with ``begin`` and ``end`` defined then it will be printed as an array. The values of the array
+      will be dumped recursively with :func:`json::dump`.
+    - If the type is a container with ``begin`` and ``end`` defined and has a pair-like ``value_type`` then it will be printed
+      as an object. The key (i.e. ``p.first``) will be dumped in accordance to :func:`json::key` while the value will be
+      recursively called with :func:`json::dump`.
+    - If the type is :class:`value` then it will print with the above in mind with its internal value.
+
+.. function:: void key(OStream& out, const T& t, const format_options& options)
+
+    Dumps the key type of object types. Only defined for integral types and strings.
+
+    - The integral type is turned into a string calling :cpp:`std::to_string <string/basic_string/to_string>`.
+    - The string type is just forwarded to :func:`json::dump`.
