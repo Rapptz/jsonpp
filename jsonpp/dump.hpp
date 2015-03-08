@@ -202,7 +202,6 @@ inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
     return out;
 }
 
-namespace detail {
 template<typename OStream, typename T, EnableIf<std::is_arithmetic<T>> = 0>
 inline void key(OStream& out, const T& t, const format_options&) {
     out << '"' << std::to_string(t) << '"';
@@ -212,7 +211,6 @@ template<typename OStream, typename T, DisableIf<std::is_arithmetic<T>> = 0>
 inline void key(OStream& out, const T& t, const format_options& opt) {
     dump(out, t, opt);
 }
-} // detail
 
 template<typename OStream, typename T, EnableIf<is_object<T>> = 0>
 inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
@@ -238,7 +236,7 @@ inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
             detail::indent(out, opt);
         }
 
-        detail::key(out, elem.first, opt);
+        key(out, elem.first, opt);
         out << ':';
 
         if(prettify) {
