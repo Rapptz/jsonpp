@@ -321,6 +321,7 @@ There's an API in place to dump (i.e. serialise) C++ objects into JSON construct
       as an object. The key (i.e. ``p.first``) will be dumped in accordance to :func:`json::key` while the value will be
       recursively called with :func:`json::dump`.
     - If the type is :class:`value` then it will print with the above in mind with its internal value.
+    - If the type has ``to_json`` then it will call it and then dump the resulting value recursively.
 
 .. function:: void key(OStream& out, const T& t, const format_options& options)
 

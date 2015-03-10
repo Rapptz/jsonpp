@@ -259,6 +259,11 @@ inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
     return out;
 }
 
+template<typename OStream, typename T, EnableIf<has_to_json<T>, Not<Or<is_object<T>, is_string<T>, is_array<T>>>> = 0>
+inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
+    return dump(out, to_json(t), opt);
+}
+
 template<typename T>
 inline std::string dump_string(const T& value, format_options opt = {}) {
     std::ostringstream ss;
