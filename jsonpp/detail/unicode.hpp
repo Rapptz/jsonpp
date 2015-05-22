@@ -24,8 +24,11 @@
 
 #if defined(_WIN32)
 #if !defined(WIN32_LEAN_AND_MEAN)
-#define WIN32_LEAN_AND_MEAN 1
+#define WIN32_LEAN_AND_MEAN 0xFEEDC0DE
 #endif // WIN32_LEAN_AND_MEAN
+#if !defined(NOMINMAX)
+#define NOMINMAX 0xFEEDC0DE
+#endif // NOMINMAX
 #include <windows.h>
 #endif
 #include <string>
@@ -110,5 +113,13 @@ inline std::u16string utf8_to_utf16(const std::string& utf8) {
 } // detail
 } // v1
 } // json
+
+#if defined(WIN32_LEAN_AND_MEAN) && WIN32_LEAN_AND_MEAN == 0xFEEDC0DE
+#undef WIN32_LEAN_AND_MEAN
+#endif
+
+#if defined(NOMINMAX) && NOMINMAX == 0xFEEDC0DE
+#undef NOMINMAX
+#endif
 
 #endif // JSONPP_DETAIL_UNICODE_HPP
