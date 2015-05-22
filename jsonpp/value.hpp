@@ -31,6 +31,7 @@
 #include <cassert>
 #include <cstdint>
 #include <memory>
+#include <stdexcept>
 #include <iosfwd>
 
 namespace json {
@@ -71,6 +72,10 @@ private:
         }
         storage_type = other.storage_type;
     }
+
+    template<typename T>
+    struct is_generic : And<Not<is_string<T>>, Not<is_bool<T>>, Not<is_number<T>>,
+                            Not<is_null<T>>, Not<std::is_same<T, object>>, Not<std::is_same<T, array>>> {};
 public:
     value() noexcept: storage_type(type::null) {}
     value(null) noexcept: storage_type(type::null) {}
@@ -249,6 +254,11 @@ public:
         return storage_type == type::array;
     }
 
+    template<typename T, EnableIf<is_generic<T>> = 0>
+    bool is() const noexcept {
+        return false;
+    }
+
     template<typename T, EnableIf<std::is_same<T, const char*>> = 0>
     T as() const {
         assert(is<T>());
@@ -289,6 +299,11 @@ public:
     T as() const {
         assert(is<T>());
         return *(storage.arr);
+    }
+
+    template<typename T, EnableIf<is_generic<T>> = 0>
+    T as() const {
+        throw std::runtime_error("calling value::as<T>() on an invalid type (use a json type instead)");
     }
 
     template<typename T>
