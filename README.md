@@ -39,7 +39,7 @@ int main() {
         p.parse("[null, \"hello\", 10.0]", v);
         if(v.is<json::array>()) {
             for(auto&& val : v.as<json::array>()) {
-                std::cout << val.get<std::string>("stuff");
+                std::cout << val.as<std::string>("stuff");
             }
         }
     }
@@ -86,6 +86,6 @@ Output:
 - Comments, e.g. `// stuff` is planned to be supported in the future.
 - The parser is not destructive.
 - The parser is recursive descent.
-- `int` and `double` types are currently aliased to be the same.
+- Numbers are stored in a `double` just like JSON but `v.as<int>` and friends work with caution.
 - String is expected to be in UTF-8.
 - Some errors are not caught but effort has been made to catch a lot of errors.
