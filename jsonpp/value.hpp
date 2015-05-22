@@ -35,7 +35,6 @@
 #include <iosfwd>
 
 namespace json {
-inline namespace v1 {
 class value {
 public:
     using object = std::map<std::string, value>;
@@ -77,19 +76,19 @@ private:
     struct is_generic : And<Not<is_string<T>>, Not<is_bool<T>>, Not<is_number<T>>,
                             Not<is_null<T>>, Not<std::is_same<T, object>>, Not<std::is_same<T, array>>> {};
 public:
-    value() noexcept: storage_type(type::null) {}
-    value(null) noexcept: storage_type(type::null) {}
+    value() JSONPP_NOEXCEPT: storage_type(type::null) {}
+    value(null) JSONPP_NOEXCEPT: storage_type(type::null) {}
 
     ~value() {
         clear();
     }
 
-    value(double v) noexcept: storage_type(type::number) {
+    value(double v) JSONPP_NOEXCEPT: storage_type(type::number) {
         storage.number = v;
     }
 
     template<typename T, EnableIf<is_bool<T>, Not<is_string<T>>> = 0>
-    value(const T& b) noexcept: storage_type(type::boolean) {
+    value(const T& b) JSONPP_NOEXCEPT: storage_type(type::boolean) {
         storage.boolean = b;
     }
 
@@ -118,7 +117,7 @@ public:
         copy(other);
     }
 
-    value(value&& other) noexcept {
+    value(value&& other) JSONPP_NOEXCEPT {
         switch(other.storage_type) {
         case type::array:
             storage.arr = other.storage.arr;
@@ -158,7 +157,7 @@ public:
         return *this;
     }
 
-    value& operator=(value&& other) noexcept {
+    value& operator=(value&& other) JSONPP_NOEXCEPT {
         clear();
         switch(other.storage_type) {
         case type::array:
@@ -207,7 +206,7 @@ public:
         }
     }
 
-    void clear() noexcept {
+    void clear() JSONPP_NOEXCEPT {
         switch(storage_type) {
         case type::array:
             delete storage.arr;
@@ -225,37 +224,37 @@ public:
     }
 
     template<typename T, EnableIf<is_string<T>> = 0>
-    bool is() const noexcept {
+    bool is() const JSONPP_NOEXCEPT {
         return storage_type == type::string;
     }
 
     template<typename T, EnableIf<is_null<T>> = 0>
-    bool is() const noexcept {
+    bool is() const JSONPP_NOEXCEPT {
         return storage_type == type::null;
     }
 
     template<typename T, EnableIf<is_number<T>> = 0>
-    bool is() const noexcept {
+    bool is() const JSONPP_NOEXCEPT {
         return storage_type == type::number;
     }
 
     template<typename T, EnableIf<is_bool<T>> = 0>
-    bool is() const noexcept {
+    bool is() const JSONPP_NOEXCEPT {
         return storage_type == type::boolean;
     }
 
     template<typename T, EnableIf<std::is_same<T, object>> = 0>
-    bool is() const noexcept {
+    bool is() const JSONPP_NOEXCEPT {
         return storage_type == type::object;
     }
 
     template<typename T, EnableIf<std::is_same<T, array>> = 0>
-    bool is() const noexcept {
+    bool is() const JSONPP_NOEXCEPT {
         return storage_type == type::array;
     }
 
     template<typename T, EnableIf<is_generic<T>> = 0>
-    bool is() const noexcept {
+    bool is() const JSONPP_NOEXCEPT {
         return false;
     }
 
@@ -371,7 +370,6 @@ template<typename T>
 inline auto value_cast(const value& v, T&& def) -> decltype(v.as<Unqualified<T>>(std::forward<T>(def))) {
     return v.as<Unqualified<T>>(std::forward<T>(def));
 }
-} // v1
 } // json
 
 #endif // JSONPP_VALUE_HPP

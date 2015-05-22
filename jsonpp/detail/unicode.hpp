@@ -42,7 +42,6 @@
 #include <cerrno>
 
 namespace json {
-inline namespace v1 {
 namespace detail {
 #if defined(_WIN32)
 inline std::u16string utf8_to_utf16(const std::string& utf8) {
@@ -116,7 +115,6 @@ inline std::u16string utf8_to_utf16(const std::string& utf8) {
 }
 #endif
 } // detail
-} // v1
 } // json
 
 #if defined(JSONPP_CLEAN_UP_DEFINES)

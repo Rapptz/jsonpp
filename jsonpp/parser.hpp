@@ -28,7 +28,6 @@
 #include <iosfwd>
 
 namespace json {
-inline namespace v1 {
 inline bool is_space(char ch) {
     switch(ch) {
     case 0x0D: // carriage return
@@ -390,7 +389,7 @@ private:
         skip_white_space();
     }
 public:
-    parser(const char* str) noexcept: str(str) {}
+    parser(const char* str) JSONPP_NOEXCEPT: str(str) {}
 
     void parse(value& v) {
         parse_value(v);
@@ -414,7 +413,6 @@ inline void parse(IStream& in, value& v) {
         parse(ss.str(), v);
     }
 }
-} // v1
 } // json
 
 #endif // JSONPP_PARSER_HPP

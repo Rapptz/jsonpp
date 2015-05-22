@@ -22,11 +22,11 @@
 #ifndef JSON_TYPE_TRAITS_HPP
 #define JSON_TYPE_TRAITS_HPP
 
+#include "config.hpp"
 #include <type_traits>
 #include <string>
 
 namespace json {
-inline namespace v1 {
 template<typename T>
 struct identity {
     using type = T;
@@ -146,7 +146,6 @@ struct has_to_json : decltype(has_to_json_impl::test<T>(0)) {};
 enum class type {
     null, string, boolean, number, array, object
 };
-} // v1
 } // json
 
 #endif // JSON_TYPE_TRAITS_HPP

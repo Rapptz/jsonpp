@@ -30,7 +30,6 @@
 #include <cmath>
 
 namespace json {
-inline namespace v1 {
 struct format_options {
     enum : int {
         none = 0,
@@ -39,8 +38,8 @@ struct format_options {
         escape_multi_byte = 1 << 2
     };
 
-    format_options() noexcept = default;
-    format_options(int indent, int flags = none, int precision = 6) noexcept: flags(flags), indent(indent), precision(precision) {}
+    format_options() JSONPP_NOEXCEPT = default;
+    format_options(int indent, int flags = none, int precision = 6) JSONPP_NOEXCEPT: flags(flags), indent(indent), precision(precision) {}
 
     int flags = none;
     int indent = 4;
@@ -270,7 +269,6 @@ inline std::string dump_string(const T& value, format_options opt = {}) {
     dump(ss, value, opt);
     return ss.str();
 }
-} // v1
 } // json
 
 #endif // JSONPP_DUMP_HPP

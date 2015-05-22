@@ -19,25 +19,21 @@
 // IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 // CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-#ifndef JSONPP_ERROR_HPP
-#define JSONPP_ERROR_HPP
+#ifndef JSONPP_CONFIG_HPP
+#define JSONPP_CONFIG_HPP
 
-#include "config.hpp"
-#include <string>
-#include <exception>
+// MSVC 2013 and lower don't have noexcept
+#if !defined(JSONPP_NOEXCEPT)
+#if defined(_MSC_VER) && _MSC_VER <= 1800
+#define JSONPP_NOEXCEPT throw()
+#else
+#define JSONPP_NOEXCEPT noexcept
+#endif
+#endif
 
-namespace json {
-class parser_error : public std::exception {
-private:
-    std::string error;
-public:
-    parser_error(const std::string& str, unsigned line, unsigned column):
-        error("stdin:" + std::to_string(line) + ':' + std::to_string(column) + ": error: " + str) {}
+// MSVC doesn't conform to alternative tokens as keywords
+#if defined(_MSC_VER)
+#include <ciso646>
+#endif
 
-    const char* what() const JSONPP_NOEXCEPT override {
-        return error.c_str();
-    }
-};
-} // json
-
-#endif // JSONPP_ERROR_HPP
+#endif // JSONPP_CONFIG_HPP
