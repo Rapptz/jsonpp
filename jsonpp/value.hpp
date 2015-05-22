@@ -361,6 +361,16 @@ public:
 
 using array  = value::array;
 using object = value::object;
+
+template<typename T>
+inline auto value_cast(const value& v) -> decltype(v.as<T>()) {
+    return v.as<T>();
+}
+
+template<typename T>
+inline auto value_cast(const value& v, T&& def) -> decltype(v.as<Unqualified<T>>(std::forward<T>(def))) {
+    return v.as<Unqualified<T>>(std::forward<T>(def));
+}
 } // v1
 } // json
 
