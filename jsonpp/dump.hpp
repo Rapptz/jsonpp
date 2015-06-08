@@ -35,7 +35,10 @@ struct format_options {
         none = 0,
         allow_nan_inf = 1 << 0,
         minify = 1 << 1,
-        escape_multi_byte = 1 << 2
+        escape_multi_byte = 1 << 2,
+        scientific = 1 << 3,
+        fixed = 1 << 4,
+        defaultfloat = scientific | fixed
     };
 
     format_options() JSONPP_NOEXCEPT = default;
@@ -78,9 +81,26 @@ inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
         return out;
     }
     auto precision = out.precision();
+    auto flags = out.flags();
+
+
+    if((opt.flags & opt.defaultfloat) == opt.defaultfloat) {
+        out.unsetf(out.floatfield);
+    }
+    else if((opt.flags & opt.scientific) == opt.scientific) {
+        out.setf(out.scientific, out.floatfield);
+    }
+    else if((opt.flags & opt.fixed) == opt.fixed) {
+        out.setf(out.fixed, out.floatfield);
+    }
+    else {
+        out.unsetf(out.floatfield);
+    }
+
     out.precision(opt.precision);
     out << t;
     out.precision(precision);
+    out.flags(flags);
     return out;
 }
 
