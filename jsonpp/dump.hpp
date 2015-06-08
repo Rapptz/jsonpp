@@ -41,7 +41,7 @@ struct format_options {
         defaultfloat = scientific | fixed
     };
 
-    format_options() JSONPP_NOEXCEPT = default;
+    format_options() JSONPP_NOEXCEPT {};
     format_options(int indent, int flags = none, int precision = 6) JSONPP_NOEXCEPT: flags(flags), indent(indent), precision(precision) {}
 
     int flags = none;
