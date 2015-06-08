@@ -23,16 +23,11 @@
 #define JSONPP_DETAIL_UNICODE_HPP
 
 #if defined(_WIN32)
-#define JSONPP_CLEAN_UP_DEFINES 0
-#if !defined(WIN32_LEAN_AND_MEAN)
-#define WIN32_LEAN_AND_MEAN
-#undef JSONPP_CLEAN_UP_DEFINES
-#define JSONPP_CLEAN_UP_DEFINES 1
+#if !defined(JSONPP_NO_WIN32_LEAN_AND_MEAN)
+#define WIN32_LEAN_AND_MEAN 1
 #endif // WIN32_LEAN_AND_MEAN
-#if !defined(NOMINMAX)
-#undef JSONPP_CLEAN_UP_DEFINES
-#define JSONPP_CLEAN_UP_DEFINES 2
-#define NOMINMAX
+#if !defined(JSONPP_NO_NOMINMAX)
+#define NOMINMAX 1
 #endif // NOMINMAX
 #include <windows.h>
 #endif
@@ -116,15 +111,5 @@ inline std::u16string utf8_to_utf16(const std::string& utf8) {
 #endif
 } // detail
 } // json
-
-#if defined(JSONPP_CLEAN_UP_DEFINES)
-#if JSONPP_CLEAN_UP_DEFINES >= 1
-#undef WIN32_LEAN_AND_MEAN
-#endif
-#if JSONPP_CLEAN_UP_DEFINES >= 2
-#undef NOMINMAX
-#endif
-#undef JSONPP_CLEAN_UP_DEFINES
-#endif
 
 #endif // JSONPP_DETAIL_UNICODE_HPP
