@@ -92,10 +92,17 @@ public:
         storage.boolean = b;
     }
 
-
     template<typename T, EnableIf<is_string<T>, Not<is_bool<T>>> = 0>
     value(const T& str): storage_type(type::string) {
         storage.str = new std::string(str);
+    }
+
+    value(const char* str, std::size_t sz): storage_type(type::string) {
+        storage.str = new std::string(str, sz);
+    }
+
+    value(const char* str, const char* strend): storage_type(type::string) {
+        storage.str = new std::string(str, strend);
     }
 
     template<typename T, EnableIf<has_to_json<T>, Not<is_string<T>>, Not<is_bool<T>>> = 0>
