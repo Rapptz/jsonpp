@@ -31,7 +31,7 @@ class parser_error : public std::exception {
 private:
     std::string error;
 public:
-    parser_error(const std::string& str, unsigned line, unsigned column):
+    parser_error(const std::string& str, std::size_t line, std::size_t column):
         error("stdin:" + std::to_string(line) + ':' + std::to_string(column) + ": error: " + str) {}
 
     const char* what() const JSONPP_NOEXCEPT override {

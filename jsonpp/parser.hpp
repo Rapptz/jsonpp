@@ -42,12 +42,52 @@ inline bool is_space(char ch) {
 
 struct parser {
 private:
-    unsigned line = 1;
-    unsigned column = 1;
+    std::size_t line = 1;
+    std::size_t column = 1;
     const char* str;
 
+    void skip_comments () {
+        if(*str != '/') {
+            return;
+        }
+        const char* copy = str + 1;
+        switch(*copy) {
+        case '/':
+            for(++copy; *copy != '\0' && *copy != 0x0A; ++copy) {
+                  ++column;
+            }
+            break;
+        case '*':
+            ++copy;
+            if (*copy == '\0')
+                return;
+            for(const char* prev = copy++; true; ++prev, ++copy) {
+                if (*copy == '/' && *prev == '*') {
+                    ++copy;
+                    break;
+                }
+                if (*copy == '\0')
+                    throw parser_error("expected */, received EOF instead", line, column);
+                if(*str == 0x0A) {
+                    ++line;
+                    column = 0;
+                }
+                ++column;
+            }
+            break;
+        case '\0':
+        default:
+            return;
+        }
+        str = copy;
+    }
+
     void skip_white_space() {
-        while(*str != '\0' && is_space(*str)) {
+        while(*str != '\0') {
+            skip_comments();
+            if (!is_space(*str)) {
+                return;
+            }
             if(*str == 0x0A) {
                 ++line;
                 column = 0;
@@ -89,7 +129,7 @@ private:
             val = std::stod(temp);
             column += temp.size() + 1;
         }
-        catch(const std::exception& e) {
+        catch(const std::exception&) {
             throw parser_error("number could not be parsed properly", line, column);
         }
 

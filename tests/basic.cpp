@@ -125,7 +125,8 @@ TEST_CASE("strings", "[basic-strings]") {
     }
 
     SECTION("escaped strings") {
-        REQUIRE_NOTHROW(json::parse(R"("\"")", v));
+        static const auto& basic_escaped_test = R"("\"")";
+        REQUIRE_NOTHROW(json::parse(basic_escaped_test, v));
         REQUIRE(!v.is<json::array>());
         REQUIRE(!v.is<double>());
         REQUIRE(v.is<std::string>());
@@ -133,13 +134,14 @@ TEST_CASE("strings", "[basic-strings]") {
         REQUIRE(!v.is<bool>());
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<json::object>());
-        REQUIRE(json::dump_string(v, minify) == R"("\"")");
+        REQUIRE(json::dump_string(v, minify) == basic_escaped_test);
 
         auto&& str1 = v.as<std::string>();
         REQUIRE(str1.size() == 1);
         REQUIRE(str1.back() == '"');
-
-        REQUIRE_NOTHROW(json::parse(R"("\t\n\b\"\u2000\u1234")", v));
+        
+        static const auto& hex_escapes = R"("\t\n\b\"\u2000\u1234")";
+        REQUIRE_NOTHROW(json::parse(hex_escapes, v));
         REQUIRE(!v.is<json::array>());
         REQUIRE(!v.is<double>());
         REQUIRE(v.is<std::string>());
@@ -342,7 +344,7 @@ TEST_CASE("null and bool", "[basic-null-bool]") {
         REQUIRE(json::dump_string(v, minify) == "null");
 
         auto&& x = v.as<json::null>();
-        REQUIRE(x == nullptr);
+        REQUIRE((x == nullptr));
 
         REQUIRE_NOTHROW(json::parse("\t\n\t\n\ttrue\n\t\n\t", v));
         REQUIRE(v.is<bool>());
@@ -415,6 +417,78 @@ TEST_CASE("null and bool", "[basic-null-bool]") {
     }
 }
 
+TEST_CASE("comments", "[basic-comments]") {
+    json::value v;
+    json::format_options minify;
+    minify.indent = 0;
+    minify.flags = minify.minify;
+
+    SECTION("empty objects") {
+        REQUIRE_NOTHROW(json::parse("\t// A comment does not affect anything\n\t\n{     \t\n }/* Truly it does not */\n\n\t\n", v));
+        REQUIRE(!v.is<json::null>());
+        REQUIRE(!v.is<std::nullptr_t>());
+        REQUIRE(!v.is<json::array>());
+        REQUIRE(!v.is<double>());
+        REQUIRE(!v.is<std::string>());
+        REQUIRE(v.is<json::object>());
+        REQUIRE(!v.is<bool>());
+        REQUIRE(json::dump_string(v, minify) == "{}");
+
+        auto&& obj = v.as<json::object>();
+        REQUIRE(obj.empty());
+    }
+
+    SECTION("one element object") {
+        REQUIRE_NOTHROW(json::parse("\n\t\n{ \"hello\"/*the start */: 10 }\n\t\n", v));
+        REQUIRE(!v.is<json::null>());
+        REQUIRE(!v.is<std::nullptr_t>());
+        REQUIRE(!v.is<json::array>());
+        REQUIRE(!v.is<double>());
+        REQUIRE(!v.is<std::string>());
+        REQUIRE(v.is<json::object>());
+        REQUIRE(!v.is<bool>());
+        REQUIRE(json::dump_string(v, minify) == "{\"hello\":10}");
+
+        auto&& obj = v.as<json::object>();
+        REQUIRE(!obj.empty());
+        REQUIRE(obj.size() == 1);
+        REQUIRE(obj.count("hello"));
+        REQUIRE(obj["hello"].is<int>());
+        REQUIRE(obj["hello"].as<int>() == 10);
+    }
+
+    SECTION("regular objects") {
+        REQUIRE_NOTHROW(json::parse("// Some regular objects\n\t/* really just some regular objects! */\n\t{\"hello\" // They can go anywhere?\n:10, \"world\": null, \"test\":/*\"dahdjwakd\": invalid invalid*/ \"work\"}//Seems like it's alright!\n\t\n", v));
+        REQUIRE(!v.is<json::null>());
+        REQUIRE(!v.is<std::nullptr_t>());
+        REQUIRE(!v.is<json::array>());
+        REQUIRE(!v.is<double>());
+        REQUIRE(!v.is<std::string>());
+        REQUIRE(v.is<json::object>());
+        REQUIRE(!v.is<bool>());
+
+        auto&& obj = v.as<json::object>();
+        REQUIRE(!obj.empty());
+        REQUIRE(obj.size() == 3);
+        REQUIRE(obj.count("hello"));
+        REQUIRE(obj["hello"].is<int>());
+        REQUIRE(obj["hello"].as<int>() == 10);
+        REQUIRE(obj.count("world"));
+        REQUIRE(obj["world"].is<json::null>());
+        REQUIRE((obj["world"].as<json::null>() == nullptr));
+        REQUIRE(obj.count("test"));
+        REQUIRE(obj["test"].is<std::string>());
+        REQUIRE(obj["test"].as<std::string>() == "work");
+    }
+
+    SECTION("invalid") {
+        REQUIRE_THROWS(json::parse("// coments don't affect anything\n{ \"hello\" null }", v));
+        REQUIRE_THROWS(json::parse("{ \"hello\": null/*,\n*/ goodbye: true }", v));
+        REQUIRE_THROWS(json::parse("{ }/* an unfinished comment block is an error", v));
+        REQUIRE_THROWS(json::parse("/* an unfinished comment at the start also fails{ }", v));
+    }
+}
+
 TEST_CASE("objects", "[basic-objects]") {
     json::value v;
     json::format_options minify;
@@ -473,7 +547,7 @@ TEST_CASE("objects", "[basic-objects]") {
         REQUIRE(obj["hello"].as<int>() == 10);
         REQUIRE(obj.count("world"));
         REQUIRE(obj["world"].is<json::null>());
-        REQUIRE(obj["world"].as<json::null>() == nullptr);
+        REQUIRE((obj["world"].as<json::null>() == nullptr));
         REQUIRE(obj.count("test"));
         REQUIRE(obj["test"].is<std::string>());
         REQUIRE(obj["test"].as<std::string>() == "work");
@@ -497,7 +571,7 @@ TEST_CASE("objects", "[basic-objects]") {
         REQUIRE(obj["hello"].as<int>() == 10);
         REQUIRE(obj.count("world"));
         REQUIRE(obj["world"].is<json::null>());
-        REQUIRE(obj["world"].as<json::null>() == nullptr);
+        REQUIRE((obj["world"].as<json::null>() == nullptr));
         REQUIRE(obj.count("test"));
         REQUIRE(obj["test"].is<std::string>());
         REQUIRE(obj["test"].as<std::string>() == "work");
