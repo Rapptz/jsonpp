@@ -467,6 +467,13 @@ inline void parse(IStream& in, value& v) {
         parse<Flags>(ss.str(), v);
     }
 }
+
+template<unsigned Flags, typename T>
+inline value parse(T&& t) {
+    value v;
+    parse<Flags>(std::forward<T>(t), v);
+    return v;
+}
 } // json
 
 #endif // JSONPP_PARSER_HPP
