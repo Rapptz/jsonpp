@@ -139,7 +139,7 @@ TEST_CASE("strings", "[basic-strings]") {
         auto&& str1 = v.as<std::string>();
         REQUIRE(str1.size() == 1);
         REQUIRE(str1.back() == '"');
-        
+
         static const auto& hex_escapes = R"("\t\n\b\"\u2000\u1234")";
         REQUIRE_NOTHROW(json::parse(hex_escapes, v));
         REQUIRE(!v.is<json::array>());
@@ -424,7 +424,7 @@ TEST_CASE("comments", "[basic-comments]") {
     minify.flags = minify.minify;
 
     SECTION("empty objects") {
-        REQUIRE_NOTHROW(json::parse("\t// A comment does not affect anything\n\t\n{     \t\n }/* Truly it does not */\n\n\t\n", v));
+        REQUIRE_NOTHROW(json::parse<json::extensions::comments>("\t// A comment does not affect anything\n\t\n{     \t\n }/* Truly it does not */\n\n\t\n", v));
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<std::nullptr_t>());
         REQUIRE(!v.is<json::array>());
@@ -439,7 +439,7 @@ TEST_CASE("comments", "[basic-comments]") {
     }
 
     SECTION("one element object") {
-        REQUIRE_NOTHROW(json::parse("\n\t\n{ \"hello\"/*the start */: 10 }\n\t\n", v));
+        REQUIRE_NOTHROW(json::parse<json::extensions::comments>("\n\t\n{ \"hello\"/*the start */: 10 }\n\t\n", v));
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<std::nullptr_t>());
         REQUIRE(!v.is<json::array>());
@@ -458,7 +458,7 @@ TEST_CASE("comments", "[basic-comments]") {
     }
 
     SECTION("regular objects") {
-        REQUIRE_NOTHROW(json::parse("// Some regular objects\n\t/* really just some regular objects! */\n\t{\"hello\" // They can go anywhere?\n:10, \"world\": null, \"test\":/*\"dahdjwakd\": invalid invalid*/ \"work\"}//Seems like it's alright!\n\t\n", v));
+        REQUIRE_NOTHROW(json::parse<json::extensions::comments>("// Some regular objects\n\t/* really just some regular objects! */\n\t{\"hello\" // They can go anywhere?\n:10, \"world\": null, \"test\":/*\"dahdjwakd\": invalid invalid*/ \"work\"}//Seems like it's alright!\n\t\n", v));
         REQUIRE(!v.is<json::null>());
         REQUIRE(!v.is<std::nullptr_t>());
         REQUIRE(!v.is<json::array>());
@@ -482,10 +482,10 @@ TEST_CASE("comments", "[basic-comments]") {
     }
 
     SECTION("invalid") {
-        REQUIRE_THROWS(json::parse("// coments don't affect anything\n{ \"hello\" null }", v));
-        REQUIRE_THROWS(json::parse("{ \"hello\": null/*,\n*/ goodbye: true }", v));
-        REQUIRE_THROWS(json::parse("{ }/* an unfinished comment block is an error", v));
-        REQUIRE_THROWS(json::parse("/* an unfinished comment at the start also fails{ }", v));
+        REQUIRE_THROWS(json::parse<json::extensions::comments>("// coments don't affect anything\n{ \"hello\" null }", v));
+        REQUIRE_THROWS(json::parse<json::extensions::comments>("{ \"hello\": null/*,\n*/ goodbye: true }", v));
+        REQUIRE_THROWS(json::parse<json::extensions::comments>("{ }/* an unfinished comment block is an error", v));
+        REQUIRE_THROWS(json::parse<json::extensions::comments>("/* an unfinished comment at the start also fails{ }", v));
     }
 }
 

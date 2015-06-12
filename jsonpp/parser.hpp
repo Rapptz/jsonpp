@@ -40,13 +40,23 @@ inline bool is_space(char ch) {
     }
 }
 
+struct extensions {
+    enum : unsigned {
+        none = 0,
+        comments = 1 << 1,
+        all = comments
+    };
+};
+
+template<unsigned Flags>
 struct parser {
 private:
     std::size_t line = 1;
     std::size_t column = 1;
     const char* str;
 
-    void skip_comments () {
+    template<unsigned X = Flags, EnableIf<has_extension<X, extensions::comments>> = 0>
+    void skip_comments() {
         if(*str != '/') {
             return;
         }
@@ -81,6 +91,9 @@ private:
         }
         str = copy;
     }
+
+    template<unsigned X = Flags, DisableIf<has_extension<X, extensions::comments>> = 0>
+    void skip_comments() {}
 
     void skip_white_space() {
         while(*str != '\0') {
@@ -439,18 +452,19 @@ public:
     }
 };
 
+template<unsigned Flags = extensions::none>
 inline void parse(const std::string& str, value& v) {
-    parser js(str.c_str());
+    parser<Flags> js(str.c_str());
     js.parse(v);
 }
 
-template<typename IStream, DisableIf<is_string<IStream>> = 0>
+template<unsigned Flags = extensions::none, typename IStream, DisableIf<is_string<IStream>> = 0>
 inline void parse(IStream& in, value& v) {
     static_assert(std::is_base_of<std::istream, IStream>::value, "Input stream passed must inherit from std::istream");
     if(in) {
         std::ostringstream ss;
         ss << in.rdbuf();
-        parse(ss.str(), v);
+        parse<Flags>(ss.str(), v);
     }
 }
 } // json

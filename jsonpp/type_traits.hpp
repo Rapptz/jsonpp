@@ -146,6 +146,9 @@ struct has_to_json : decltype(has_to_json_impl::test<T>(0)) {};
 enum class type {
     null, string, boolean, number, array, object
 };
+
+template<unsigned Flags, unsigned Flag>
+struct has_extension : Bool<(Flags & Flag) == Flag> {};
 } // json
 
 #endif // JSON_TYPE_TRAITS_HPP
