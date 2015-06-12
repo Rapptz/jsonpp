@@ -23,6 +23,7 @@
 #define JSONPP_ERROR_HPP
 
 #include "config.hpp"
+#include <cstddef>
 #include <string>
 #include <exception>
 
