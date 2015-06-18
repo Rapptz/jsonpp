@@ -38,7 +38,7 @@
 
 #if !defined(JSONPP_ASSERT)
 #include <cassert>
-#define JSONPP_ASSERT(condition, message) assert((condition) && (messagge))
+#define JSONPP_ASSERT(condition, message) assert((condition) && (message))
 #endif // JSONPP_ASSERT
 
 #endif // JSONPP_CONFIG_HPP
