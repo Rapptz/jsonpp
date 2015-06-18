@@ -28,7 +28,6 @@
 #include <sstream>
 #include <map>
 #include <vector>
-#include <cassert>
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
@@ -267,43 +266,43 @@ public:
 
     template<typename T, EnableIf<std::is_same<T, const char*>> = 0>
     T as() const {
-        assert(is<T>());
+        JSONPP_ASSERT(is<T>(), "called as<T> with type mismatch");
         return storage.str->c_str();
     }
 
     template<typename T, EnableIf<std::is_same<T, std::string>> = 0>
     T as() const {
-        assert(is<T>());
+        JSONPP_ASSERT(is<T>(), "called as<T> with type mismatch");
         return *(storage.str);
     }
 
     template<typename T, EnableIf<is_null<T>> = 0>
     T as() const {
-        assert(is<T>());
+        JSONPP_ASSERT(is<T>(), "called as<T> with type mismatch");
         return {};
     }
 
     template<typename T, EnableIf<is_bool<T>> = 0>
     T as() const {
-        assert(is<T>());
+        JSONPP_ASSERT(is<T>(), "called as<T> with type mismatch");
         return storage.boolean;
     }
 
     template<typename T, EnableIf<is_number<T>> = 0>
     T as() const {
-        assert(is<T>());
+        JSONPP_ASSERT(is<T>(), "called as<T> with type mismatch");
         return storage.number;
     }
 
     template<typename T, EnableIf<std::is_same<T, object>> = 0>
     T as() const {
-        assert(is<T>());
+        JSONPP_ASSERT(is<T>(), "called as<T> with type mismatch");
         return *(storage.obj);
     }
 
     template<typename T, EnableIf<std::is_same<T, array>> = 0>
     T as() const {
-        assert(is<T>());
+        JSONPP_ASSERT(is<T>(), "called as<T> with type mismatch");
         return *(storage.arr);
     }
 

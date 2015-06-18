@@ -36,4 +36,9 @@
 #include <ciso646>
 #endif
 
+#if !defined(JSONPP_ASSERT)
+#include <cassert>
+#define JSONPP_ASSERT(condition, message) assert((condition) && (messagge))
+#endif // JSONPP_ASSERT
+
 #endif // JSONPP_CONFIG_HPP
