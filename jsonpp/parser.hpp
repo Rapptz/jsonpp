@@ -468,7 +468,7 @@ inline void parse(IStream& in, value& v) {
     }
 }
 
-template<unsigned Flags, typename T>
+template<unsigned Flags = extensions::none, typename T>
 inline value parse(T&& t) {
     value v;
     parse<Flags>(std::forward<T>(t), v);
