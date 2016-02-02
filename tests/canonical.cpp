@@ -105,12 +105,12 @@ TEST_CASE("canonical", "[canonical]") {
 
             json::value val;
             json::parse(payload, val);
-            REQUIRE_THROWS_AS( json::canonical_from_json<thing>(val), json::detail::exception );
+            REQUIRE_THROWS_AS( json::canonical_from_json<thing>(val), json::canonical_from_json_error );
 
             std::string message;
             try {
                 json::canonical_from_json<thing>(val);
-            } catch(json::detail::exception& e) {
+            } catch(json::canonical_from_json_error& e) {
                 message = std::move(e).message;
             }
             REQUIRE( message == "missing member 'name'" );
@@ -128,12 +128,12 @@ TEST_CASE("canonical", "[canonical]") {
 
             json::value val;
             json::parse(payload, val);
-            REQUIRE_THROWS_AS( json::canonical_from_json<thing>(val), json::detail::exception );
+            REQUIRE_THROWS_AS( json::canonical_from_json<thing>(val), json::canonical_from_json_error );
 
             std::string message;
             try {
                 json::canonical_from_json<thing>(val);
-            } catch(json::detail::exception& e) {
+            } catch(json::canonical_from_json_error& e) {
                 message = std::move(e).message;
             }
             std::string const expected = "bad member 'dress': bad member 'is_it_blue': expected a thing, received number instead";

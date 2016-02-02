@@ -28,7 +28,14 @@
 #include <exception>
 
 namespace json {
-class parser_error : public std::exception {
+
+struct error: std::exception {
+    const char* what() const JSONPP_NOEXCEPT override {
+        return "json::error";
+    }
+};
+
+class parser_error : public error {
 private:
     std::string error;
 public:
@@ -39,6 +46,19 @@ public:
         return error.c_str();
     }
 };
+
+class canonical_from_json_error : public error {
+public:
+    std::string message;
+
+    explicit canonical_from_json_error(std::string message)
+        : message(std::move(message)) {}
+
+    const char* what() const JSONPP_NOEXCEPT override {
+        return message.c_str();
+    }
+};
+
 } // json
 
 #endif // JSONPP_ERROR_HPP

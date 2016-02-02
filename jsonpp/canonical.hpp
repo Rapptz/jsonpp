@@ -22,6 +22,7 @@
 #ifndef JSON_CANONICAL_HPP
 #define JSON_CANONICAL_HPP
 
+#include "jsonpp/error.hpp"
 #include "jsonpp/value.hpp"
 
 namespace json {
@@ -30,10 +31,6 @@ template<typename Type>
 struct canonical_recipe {};
 
 namespace detail {
-
-struct exception {
-    std::string message;
-};
 
 struct to_json_algo;
 
@@ -95,7 +92,7 @@ private:
     static Dest impl(value const& v, int)
     {
         if(!v.is<Dest>()) {
-            throw detail::exception { "expected a thing, received " + v.type_name() + " instead" };
+            throw canonical_from_json_error { "expected a thing, received " + v.type_name() + " instead" };
         }
         return v.as<Dest>();
     }
@@ -104,7 +101,7 @@ private:
     static Dest impl(value const& v, long)
     {
         if(!v.is<object>()) {
-            throw detail::exception { "expected object, received a(n) " + v.type_name() + " instead" };
+            throw canonical_from_json_error { "expected object, received a(n) " + v.type_name() + " instead" };
         }
 
         auto&& obj = v.as<object>();
@@ -140,12 +137,12 @@ struct from_json_algo {
 
         auto it = obj.find(name);
         if(it == obj.end()) {
-            throw detail::exception { "missing member '"s + name + "'" };
+            throw canonical_from_json_error { "missing member '"s + name + "'" };
         }
 
         try {
             value = canonical_from_json<Value>(it->second);
-        } catch(detail::exception& e) {
+        } catch(canonical_from_json_error& e) {
             e.message = "bad member '"s + name + "': " + std::move(e).message;
             throw;
         }
