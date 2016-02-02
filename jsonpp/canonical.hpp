@@ -24,6 +24,7 @@
 
 #include "jsonpp/error.hpp"
 #include "jsonpp/value.hpp"
+#include <sstream>
 
 namespace json {
 
@@ -75,6 +76,39 @@ struct to_json_algo {
 
 struct from_json_algo;
 
+template<typename T, typename Sfinae = int>
+struct type_name;
+
+template<typename T> struct type_name<T, EnableIf<is_null<T>>> {
+    static const char* value;
+};
+template<typename T> const char* type_name<T, EnableIf<is_null<T>>>::value = "null";
+
+template<typename T> struct type_name<T, EnableIf<is_bool<T>>> {
+    static const char* value;
+};
+template<typename T> const char* type_name<T, EnableIf<is_bool<T>>>::value = "boolean";
+
+template<typename T> struct type_name<T, EnableIf<is_number<T>>> {
+    static const char* value;
+};
+template<typename T> const char* type_name<T, EnableIf<is_number<T>>>::value = "number";
+
+template<typename T> struct type_name<T, EnableIf<is_string<T>>> {
+    static const char* value;
+};
+template<typename T> const char* type_name<T, EnableIf<is_string<T>>>::value = "string";
+
+template<typename T> struct type_name<T, EnableIf<is_object<T>>> {
+    static const char* value;
+};
+template<typename T> const char* type_name<T, EnableIf<is_object<T>>>::value = "object";
+
+template<typename T> struct type_name<T, EnableIf<is_array<T>>> {
+    static const char* value;
+};
+template<typename T> const char* type_name<T, EnableIf<is_array<T>>>::value = "array";
+
 template<typename Dest>
 struct canonical_from_json_type {
 private:
@@ -92,7 +126,9 @@ private:
     static Dest impl(value const& v, int)
     {
         if(!v.is<Dest>()) {
-            throw canonical_from_json_error { "expected a thing, received " + v.type_name() + " instead" };
+            std::ostringstream fmt;
+            fmt << "expected a(n) " << type_name<Dest>::value << ", received a(n) " << v.type_name() << " instead";
+            throw canonical_from_json_error { std::move(fmt).str() };
         }
         return v.as<Dest>();
     }
@@ -101,7 +137,9 @@ private:
     static Dest impl(value const& v, long)
     {
         if(!v.is<object>()) {
-            throw canonical_from_json_error { "expected object, received a(n) " + v.type_name() + " instead" };
+            std::ostringstream fmt;
+            fmt << "expected an object, received a(n) " << v.type_name() << " instead";
+            throw canonical_from_json_error { std::move(fmt).str() };
         }
 
         auto&& obj = v.as<object>();
@@ -133,17 +171,19 @@ struct from_json_algo {
     template<typename Value>
     void member(const char* name, Value& value) const
     {
-        using namespace std::literals::string_literals;
-
         auto it = obj.find(name);
         if(it == obj.end()) {
-            throw canonical_from_json_error { "missing member '"s + name + "'" };
+            std::ostringstream fmt;
+            fmt << "missing member '" << name << '\'';
+            throw canonical_from_json_error { std::move(fmt).str() };
         }
 
         try {
             value = canonical_from_json<Value>(it->second);
         } catch(canonical_from_json_error& e) {
-            e.message = "bad member '"s + name + "': " + std::move(e).message;
+            std::ostringstream fmt;
+            fmt << "bad member '" << name << "': " << std::move(e).message;
+            e.message = std::move(fmt).str();
             throw;
         }
     }

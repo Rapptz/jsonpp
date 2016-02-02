@@ -60,9 +60,10 @@ template<> struct canonical_recipe<thing>: thing_recipe {};
 
 TEST_CASE("canonical", "[canonical]") {
     SECTION("canonical_to_json") {
-        auto json = dump_string(json::canonical_to_json(thing { "barry", 42, {} }));
+        {
+            auto json = dump_string(json::canonical_to_json(thing { "barry", 42, {} }));
 
-        constexpr auto& rawtext = R"end(
+            constexpr auto& rawtext = R"end(
 {
     "dress": {
         "is_it_blue": false
@@ -71,9 +72,10 @@ TEST_CASE("canonical", "[canonical]") {
     "number_of_ants": 42
 }
 )end";
-        std::string const expected { rawtext+1, std::end(rawtext)-2 };
+            std::string const expected { rawtext+1, std::end(rawtext)-2 };
 
-        REQUIRE( json == expected );
+            REQUIRE( json == expected );
+        }
     };
 
     SECTION("canonical_from_json") {
@@ -83,6 +85,7 @@ TEST_CASE("canonical", "[canonical]") {
     "name": "barry",
     "dress": { "is_it_blue": true },
     "number_of_ants": -3,
+    "leniency": null,
 }
 )end";
             std::string const payload { rawtext+1, std::end(rawtext)-2 };
@@ -90,7 +93,7 @@ TEST_CASE("canonical", "[canonical]") {
             json::value val;
             json::parse(payload, val);
             auto result = json::canonical_from_json<thing>(val);
-            REQUIRE( result == (thing { "barry", -3, true }) );
+            REQUIRE( result == (thing { "barry", -3, { true } }) );
         }
 
         {
@@ -136,7 +139,7 @@ TEST_CASE("canonical", "[canonical]") {
             } catch(json::canonical_from_json_error& e) {
                 message = std::move(e).message;
             }
-            std::string const expected = "bad member 'dress': bad member 'is_it_blue': expected a thing, received number instead";
+            std::string const expected = "bad member 'dress': bad member 'is_it_blue': expected a(n) boolean, received a(n) number instead";
             REQUIRE( message == expected );
         }
     }
