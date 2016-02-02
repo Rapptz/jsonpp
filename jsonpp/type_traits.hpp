@@ -65,6 +65,14 @@ using EnableIf = typename std::enable_if<And<Args...>::value, int>::type;
 template<typename... Args>
 using DisableIf = typename std::enable_if<Not<And<Args...>>::value, int>::type;
 
+template<typename T, typename... Dummies>
+struct depend_on {
+    using type = T;
+};
+
+template<typename T, typename... Dummies>
+using DependOn = typename depend_on<T, Dummies...>::type;
+
 template<typename T>
 struct is_bool : std::is_same<T, bool> {};
 

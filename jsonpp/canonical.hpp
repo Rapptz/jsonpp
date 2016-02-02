@@ -26,9 +26,6 @@
 
 namespace json {
 
-template<typename X, typename... Dummies> struct depend_on { using type = X; };
-template<typename X, typename... Dummies> using depend_on_t = typename depend_on<X, Dummies...>::type;
-
 template<typename Type>
 struct canonical_recipe {};
 
@@ -46,7 +43,7 @@ private:
     template<typename Value, DisableIf<is_json<Value>> = 0>
     static value impl(Value const& value, long)
     {
-        depend_on_t<to_json_algo, Value> algo {};
+        DependOn<to_json_algo, Value> algo {};
         canonical_recipe<Value> {}(algo, value);
         return std::move(algo).result;
     }
@@ -79,12 +76,12 @@ struct canonical_from_json_type {
 private:
     template<typename D>
     using is_json = Or<
-        is_null<depend_on_t<Value, D>>,
-        is_bool<depend_on_t<Value, D>>,
-        is_number<depend_on_t<Value, D>>,
-        is_string<depend_on_t<Value, D>>,
-        is_array<depend_on_t<Value, D>>,
-        is_object<depend_on_t<Value, D>>
+        is_null<DependOn<Value, D>>,
+        is_bool<DependOn<Value, D>>,
+        is_number<DependOn<Value, D>>,
+        is_string<DependOn<Value, D>>,
+        is_array<DependOn<Value, D>>,
+        is_object<DependOn<Value, D>>
     >;
 
     template<typename D = void, EnableIf<is_json<D>> = 0>
@@ -100,11 +97,11 @@ private:
     static Value impl(value const& v, long)
     {
         if(!v.is<object>()) {
-            throw exception { "excepted object, received a(n) " + v.type_name() + " instead" };
+            throw exception { "expected object, received a(n) " + v.type_name() + " instead" };
         }
 
         auto&& obj = v.as<object>();
-        from_json_algo algo { obj };
+        DependOn<from_json_algo, D> algo { obj };
         Value result;
         canonical_recipe<Value> {}(algo, result);
         return result;
