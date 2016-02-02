@@ -58,11 +58,11 @@ template<> struct canonical_recipe<color>: color_recipe {};
 template<> struct canonical_recipe<thing>: thing_recipe {};
 } // json
 
-TEST_CASE("canonical", "[types don't know#") {
+TEST_CASE("canonical", "[canonical]") {
     SECTION("canonical_to_json") {
         auto json = dump_string(json::canonical_to_json(thing { "barry", 42, {} }));
 
-        constexpr auto& expected = R"end(
+        constexpr auto& rawtext = R"end(
 {
     "dress": {
         "is_it_blue": false
@@ -71,65 +71,69 @@ TEST_CASE("canonical", "[types don't know#") {
     "number_of_ants": 42
 }
 )end";
+        std::string const expected { rawtext+1, std::end(rawtext)-2 };
 
-        REQUIRE( json == std::string(expected+1, std::end(expected)-2) );
+        REQUIRE( json == expected );
     };
 
     SECTION("canonical_from_json") {
         {
-            constexpr auto& payload = R"end(
+            constexpr auto& rawtext = R"end(
 {
-    "name": "rebort",
+    "name": "barry",
     "dress": { "is_it_blue": true },
     "number_of_ants": -3,
 }
 )end";
+            std::string const payload { rawtext+1, std::end(rawtext)-2 };
 
             json::value val;
-            json::parse(std::string { payload+1, std::end(payload)-2 }, val);
+            json::parse(payload, val);
             auto result = json::canonical_from_json<thing>(val);
-            REQUIRE( result == (thing { "rebort", -3, true }) );
+            REQUIRE( result == (thing { "barry", -3, true }) );
         }
 
         {
-            constexpr auto& payload = R"end(
+            constexpr auto& rawtext = R"end(
 {
-    "nome": "robert",
+    "nome": "barry",
     "dress": { "is_it_blue": true },
     "number_of_ants": -3,
 }
 )end";
+            std::string const payload { rawtext+1, std::end(rawtext)-2 };
 
             json::value val;
-            json::parse(std::string { payload+1, std::end(payload)-2 }, val);
-            REQUIRE_THROWS_AS( json::canonical_from_json<thing>(val), json::exception );
+            json::parse(payload, val);
+            REQUIRE_THROWS_AS( json::canonical_from_json<thing>(val), json::detail::exception );
 
             std::string message;
             try {
                 json::canonical_from_json<thing>(val);
-            } catch(json::exception& e) {
+            } catch(json::detail::exception& e) {
                 message = std::move(e).message;
             }
             REQUIRE( message == "missing member 'name'" );
         }
 
         {
-            constexpr auto& payload = R"end(
+            constexpr auto& rawtext = R"end(
 {
-    "name": "robert",
+    "name": "barry",
     "dress": { "is_it_blue": 4 },
     "number_of_ants": -3,
 }
 )end";
+            std::string const payload { rawtext+1, std::end(rawtext)-2 };
 
             json::value val;
-            json::parse(std::string { payload+1, std::end(payload)-2 }, val);
-            REQUIRE_THROWS_AS( json::canonical_from_json<thing>(val), json::exception );
+            json::parse(payload, val);
+            REQUIRE_THROWS_AS( json::canonical_from_json<thing>(val), json::detail::exception );
 
             std::string message;
             try {
                 json::canonical_from_json<thing>(val);
-            } catch(json::exception& e) {
+            } catch(json::detail::exception& e) {
                 message = std::move(e).message;
             }
             std::string const expected = "bad member 'dress': bad member 'is_it_blue': expected a thing, received number instead";
