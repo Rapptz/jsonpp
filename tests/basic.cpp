@@ -453,8 +453,8 @@ TEST_CASE("comments", "[basic-comments]") {
         REQUIRE(!obj.empty());
         REQUIRE(obj.size() == 1);
         REQUIRE(obj.count("hello"));
-        REQUIRE(obj["hello"].is<int>());
-        REQUIRE(obj["hello"].as<int>() == 10);
+        REQUIRE(obj.at("hello").is<int>());
+        REQUIRE(obj.at("hello").as<int>() == 10);
     }
 
     SECTION("regular objects") {
@@ -471,14 +471,14 @@ TEST_CASE("comments", "[basic-comments]") {
         REQUIRE(!obj.empty());
         REQUIRE(obj.size() == 3);
         REQUIRE(obj.count("hello"));
-        REQUIRE(obj["hello"].is<int>());
-        REQUIRE(obj["hello"].as<int>() == 10);
+        REQUIRE(obj.at("hello").is<int>());
+        REQUIRE(obj.at("hello").as<int>() == 10);
         REQUIRE(obj.count("world"));
-        REQUIRE(obj["world"].is<json::null>());
-        REQUIRE((obj["world"].as<json::null>() == nullptr));
+        REQUIRE(obj.at("world").is<json::null>());
+        REQUIRE((obj.at("world").as<json::null>() == nullptr));
         REQUIRE(obj.count("test"));
-        REQUIRE(obj["test"].is<std::string>());
-        REQUIRE(obj["test"].as<std::string>() == "work");
+        REQUIRE(obj.at("test").is<std::string>());
+        REQUIRE(obj.at("test").as<std::string>() == "work");
     }
 
     SECTION("invalid") {
@@ -525,8 +525,8 @@ TEST_CASE("objects", "[basic-objects]") {
         REQUIRE(!obj.empty());
         REQUIRE(obj.size() == 1);
         REQUIRE(obj.count("hello"));
-        REQUIRE(obj["hello"].is<int>());
-        REQUIRE(obj["hello"].as<int>() == 10);
+        REQUIRE(obj.at("hello").is<int>());
+        REQUIRE(obj.at("hello").as<int>() == 10);
     }
 
     SECTION("regular objects") {
@@ -543,14 +543,14 @@ TEST_CASE("objects", "[basic-objects]") {
         REQUIRE(!obj.empty());
         REQUIRE(obj.size() == 3);
         REQUIRE(obj.count("hello"));
-        REQUIRE(obj["hello"].is<int>());
-        REQUIRE(obj["hello"].as<int>() == 10);
+        REQUIRE(obj.at("hello").is<int>());
+        REQUIRE(obj.at("hello").as<int>() == 10);
         REQUIRE(obj.count("world"));
-        REQUIRE(obj["world"].is<json::null>());
-        REQUIRE((obj["world"].as<json::null>() == nullptr));
+        REQUIRE(obj.at("world").is<json::null>());
+        REQUIRE((obj.at("world").as<json::null>() == nullptr));
         REQUIRE(obj.count("test"));
-        REQUIRE(obj["test"].is<std::string>());
-        REQUIRE(obj["test"].as<std::string>() == "work");
+        REQUIRE(obj.at("test").is<std::string>());
+        REQUIRE(obj.at("test").as<std::string>() == "work");
     }
 
     SECTION("writing") {
@@ -567,14 +567,14 @@ TEST_CASE("objects", "[basic-objects]") {
         REQUIRE(!obj.empty());
         REQUIRE(obj.size() == 3);
         REQUIRE(obj.count("hello"));
-        REQUIRE(obj["hello"].is<int>());
-        REQUIRE(obj["hello"].as<int>() == 10);
+        REQUIRE(obj.at("hello").is<int>());
+        REQUIRE(obj.at("hello").as<int>() == 10);
         REQUIRE(obj.count("world"));
-        REQUIRE(obj["world"].is<json::null>());
-        REQUIRE((obj["world"].as<json::null>() == nullptr));
+        REQUIRE(obj.at("world").is<json::null>());
+        REQUIRE((obj.at("world").as<json::null>() == nullptr));
         REQUIRE(obj.count("test"));
-        REQUIRE(obj["test"].is<std::string>());
-        REQUIRE(obj["test"].as<std::string>() == "work");
+        REQUIRE(obj.at("test").is<std::string>());
+        REQUIRE(obj.at("test").as<std::string>() == "work");
     }
 
     SECTION("invalid") {

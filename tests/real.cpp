@@ -45,32 +45,32 @@ TEST_CASE("twitter response", "[real-twitter]") {
 
     auto&& first = arr.front().as<json::object>();
     REQUIRE(first.count("coordinates"));
-    REQUIRE(first["coordinates"].is<json::null>());
-    REQUIRE(first["text"].is<std::string>());
-    REQUIRE(first["user"].is<json::object>());
-    REQUIRE(first["entities"].is<json::object>());
-    REQUIRE(first["id_str"].as<std::string>("hello") == "240558470661799936");
-    REQUIRE(first["id"].as<unsigned long long>(10) == 240558470661799936);
+    REQUIRE(first.at("coordinates").is<json::null>());
+    REQUIRE(first.at("text").is<std::string>());
+    REQUIRE(first.at("user").is<json::object>());
+    REQUIRE(first.at("entities").is<json::object>());
+    REQUIRE(first.at("id_str").as<std::string>("hello") == "240558470661799936");
+    REQUIRE(first.at("id").as<unsigned long long>(10) == 240558470661799936);
 
-    auto&& user = first["user"].as<json::object>();
-    REQUIRE(user["name"].is<std::string>());
-    REQUIRE(user["name"].as<std::string>() == "OAuth Dancer");
-    REQUIRE(user["profile_background_tile"].as<bool>(false));
-    REQUIRE(!user["is_translator"].as<bool>(true));
-    REQUIRE(user["url"].as<std::string>("hello") == "http://bit.ly/oauth-dancer");
-    REQUIRE(user["verified"].is<bool>());
-    REQUIRE(user["verified"].as<bool>() == false);
+    auto&& user = first.at("user").as<json::object>();
+    REQUIRE(user.at("name").is<std::string>());
+    REQUIRE(user.at("name").as<std::string>() == "OAuth Dancer");
+    REQUIRE(user.at("profile_background_tile").as<bool>(false));
+    REQUIRE(!user.at("is_translator").as<bool>(true));
+    REQUIRE(user.at("url").as<std::string>("hello") == "http://bit.ly/oauth-dancer");
+    REQUIRE(user.at("verified").is<bool>());
+    REQUIRE(user.at("verified").as<bool>() == false);
 
     auto&& second = arr[1].as<json::object>();
     REQUIRE(second.count("entities"));
-    REQUIRE(second["entities"].is<json::object>());
-    REQUIRE(second["dne"].as<std::string>("hello") == "hello");
-    REQUIRE(second["geo"].is<json::object>());
-    REQUIRE(second["retweeted"].as<bool>(true) == false);
+    REQUIRE(second.at("entities").is<json::object>());
+    REQUIRE(second.at("dne").as<std::string>("hello") == "hello");
+    REQUIRE(second.at("geo").is<json::object>());
+    REQUIRE(second.at("retweeted").as<bool>(true) == false);
     REQUIRE(second.count("in_reply_to_user_id"));
-    REQUIRE(second["in_reply_to_user_id"].is<json::null>());
+    REQUIRE(second.at("in_reply_to_user_id").is<json::null>());
 
-    auto&& entities = second["entities"].as<json::object>();
-    REQUIRE(entities["urls"].is<json::array>());
-    REQUIRE(entities["user_mentions"].is<json::array>());
+    auto&& entities = second.at("entities").as<json::object>();
+    REQUIRE(entities.at("urls").is<json::array>());
+    REQUIRE(entities.at("user_mentions").is<json::array>());
 }
