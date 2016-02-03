@@ -80,34 +80,34 @@ template<typename T, typename Sfinae = int>
 struct type_name;
 
 template<typename T> struct type_name<T, EnableIf<is_null<T>>> {
-    static const char* value;
+    static constexpr const char* value = "null";
 };
-template<typename T> const char* type_name<T, EnableIf<is_null<T>>>::value = "null";
+template<typename T> constexpr const char* type_name<T, EnableIf<is_null<T>>>::value;
 
 template<typename T> struct type_name<T, EnableIf<is_bool<T>>> {
-    static const char* value;
+    static constexpr const char* value = "boolean";
 };
-template<typename T> const char* type_name<T, EnableIf<is_bool<T>>>::value = "boolean";
+template<typename T> constexpr const char* type_name<T, EnableIf<is_bool<T>>>::value;
 
 template<typename T> struct type_name<T, EnableIf<is_number<T>>> {
-    static const char* value;
+    static constexpr const char* value = "number";
 };
-template<typename T> const char* type_name<T, EnableIf<is_number<T>>>::value = "number";
+template<typename T> constexpr const char* type_name<T, EnableIf<is_number<T>>>::value;
 
 template<typename T> struct type_name<T, EnableIf<is_string<T>>> {
-    static const char* value;
+    static constexpr const char* value = "string";
 };
-template<typename T> const char* type_name<T, EnableIf<is_string<T>>>::value = "string";
+template<typename T> constexpr const char* type_name<T, EnableIf<is_string<T>>>::value;
 
 template<typename T> struct type_name<T, EnableIf<is_object<T>>> {
-    static const char* value;
+    static constexpr const char* value = "object";
 };
-template<typename T> const char* type_name<T, EnableIf<is_object<T>>>::value = "object";
+template<typename T> constexpr const char* type_name<T, EnableIf<is_object<T>>>::value;
 
 template<typename T> struct type_name<T, EnableIf<is_array<T>>> {
-    static const char* value;
+    static constexpr const char* value = "array";
 };
-template<typename T> const char* type_name<T, EnableIf<is_array<T>>>::value = "array";
+template<typename T> constexpr const char* type_name<T, EnableIf<is_array<T>>>::value;
 
 template<typename Dest>
 struct canonical_from_json_type {
