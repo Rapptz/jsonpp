@@ -123,18 +123,18 @@ private:
     >;
 
     template<typename Dep = void, EnableIf<is_json<Dep>> = 0>
-    static Dest impl(value const& v, int)
+    static void impl(value const& v, Dest& result, int)
     {
         if(!v.is<Dest>()) {
             std::ostringstream fmt;
             fmt << "expected a(n) " << type_name<Dest>::value << ", received a(n) " << v.type_name() << " instead";
             throw canonical_from_json_error { std::move(fmt).str() };
         }
-        return v.as<Dest>();
+        result = v.as<Dest>();
     }
 
     template<typename Dep = void, DisableIf<is_json<Dep>> = 0>
-    static Dest impl(value const& v, long)
+    static void impl(value const& v, Dest& result, long)
     {
         if(!v.is<object>()) {
             std::ostringstream fmt;
@@ -144,14 +144,16 @@ private:
 
         auto&& obj = v.as<object>();
         DependOn<from_json_algo, Dep> algo { obj };
-        Dest result;
         canonical_recipe<Dest> {}(algo, result);
-        return result;
     }
 
 public:
     Dest operator()(value const& v) const
-    { return impl(v, 0); }
+    {
+        Dest result;
+        impl(v, result, 0);
+        return result;
+    }
 };
 
 } // detail
