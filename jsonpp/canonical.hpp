@@ -154,6 +154,11 @@ public:
         impl(v, result, 0);
         return result;
     }
+
+    void operator()(value const& v, Dest& result) const
+    {
+        impl(v, result, 0);
+    }
 };
 
 } // detail
@@ -163,6 +168,13 @@ Dest canonical_from_json(value const& v)
 {
     static constexpr detail::canonical_from_json_type<Dest> call;
     return call(v);
+}
+
+template<typename Dest>
+void canonical_from_json(value const& v, Dest& result)
+{
+    static constexpr detail::canonical_from_json_type<Dest> call;
+    call(v, result);
 }
 
 namespace detail {
@@ -181,7 +193,7 @@ struct from_json_algo {
         }
 
         try {
-            value = canonical_from_json<Value>(it->second);
+            canonical_from_json<Value>(it->second, value);
         } catch(canonical_from_json_error& e) {
             std::ostringstream fmt;
             fmt << "bad member '" << name << "': " << std::move(e).message;

@@ -25,13 +25,43 @@ struct color_recipe {
     }
 };
 
+struct address {
+    address(int house_number)
+        : house_number(house_number) {}
+
+    int house_number;
+    std::string city = "Oz";
+};
+bool operator==(address const& lhs, address const& rhs)
+{ return std::tie(lhs.house_number, lhs.city) == std::tie(rhs.house_number, rhs.city); }
+
+struct address_recipe {
+    template<typename Algo>
+    constexpr void operator()(Algo& algo, address& a) const
+    {
+        algo.member("house_number", a.house_number);
+        algo.member("city", a.city);
+    }
+
+    template<typename Algo>
+    constexpr void operator()(Algo& algo, address const& a) const
+    {
+        algo.member("house_number", a.house_number);
+        algo.member("city", a.city);
+    }
+};
+
 struct thing {
     std::string name;
     int number_of_ants;
     color dress;
+    address location;
 };
 bool operator==(thing const& lhs, thing const& rhs)
-{ return std::tie(lhs.name, lhs.number_of_ants, lhs.dress) == std::tie(rhs.name, rhs.number_of_ants, rhs.dress); }
+{
+    return std::tie(lhs.name, lhs.number_of_ants, lhs.dress, lhs.location)
+        == std::tie(rhs.name, rhs.number_of_ants, rhs.dress, rhs.location);
+}
 
 struct thing_recipe {
     template<typename Algo>
@@ -40,6 +70,7 @@ struct thing_recipe {
         algo.member("name", t.name);
         algo.member("number_of_ants", t.number_of_ants);
         algo.member("dress", t.dress);
+        algo.member("location", t.location);
     }
 
     template<typename Algo>
@@ -48,6 +79,7 @@ struct thing_recipe {
         algo.member("name", t.name);
         algo.member("number_of_ants", t.number_of_ants);
         algo.member("dress", t.dress);
+        algo.member("location", t.location);
     }
 };
 
@@ -55,18 +87,23 @@ struct thing_recipe {
 
 namespace json {
 template<> struct canonical_recipe<color>: color_recipe {};
+template<> struct canonical_recipe<address>: address_recipe {};
 template<> struct canonical_recipe<thing>: thing_recipe {};
 } // json
 
 TEST_CASE("canonical", "[canonical]") {
     SECTION("canonical_to_json") {
         {
-            auto json = dump_string(json::canonical_to_json(thing { "barry", 42, {} }));
+            auto json = dump_string(json::canonical_to_json(thing { "barry", 42, {}, { 18 } }));
 
             constexpr auto& rawtext = R"end(
 {
     "dress": {
         "is_it_blue": false
+    },
+    "location": {
+        "city": "Oz",
+        "house_number": 18
     },
     "name": "barry",
     "number_of_ants": 42
@@ -84,6 +121,10 @@ TEST_CASE("canonical", "[canonical]") {
 {
     "name": "barry",
     "dress": { "is_it_blue": true },
+    "location": {
+        "house_number": 5,
+        "city": "Neverland",
+    },
     "number_of_ants": -3,
     "leniency": null,
 }
@@ -92,8 +133,10 @@ TEST_CASE("canonical", "[canonical]") {
 
             json::value val;
             json::parse(payload, val);
-            auto result = json::canonical_from_json<thing>(val);
-            REQUIRE( result == (thing { "barry", -3, { true } }) );
+            thing result { "no-one", -1, { false }, { -1 } };
+            json::canonical_from_json(val, result);
+            address expected { 5 }; expected.city = "Neverland";
+            REQUIRE( result == (thing { "barry", -3, { true }, expected }) );
         }
 
         {
@@ -108,11 +151,12 @@ TEST_CASE("canonical", "[canonical]") {
 
             json::value val;
             json::parse(payload, val);
-            REQUIRE_THROWS_AS( json::canonical_from_json<thing>(val), json::canonical_from_json_error );
+            thing result { "no-one", -1, { false }, { -1 } };
+            REQUIRE_THROWS_AS( json::canonical_from_json(val, result), json::canonical_from_json_error );
 
             std::string message;
             try {
-                json::canonical_from_json<thing>(val);
+                json::canonical_from_json(val, result);
             } catch(json::canonical_from_json_error& e) {
                 message = std::move(e).message;
             }
@@ -131,11 +175,12 @@ TEST_CASE("canonical", "[canonical]") {
 
             json::value val;
             json::parse(payload, val);
-            REQUIRE_THROWS_AS( json::canonical_from_json<thing>(val), json::canonical_from_json_error );
+            thing result { "no-one", -1, { false }, { -1 } };
+            REQUIRE_THROWS_AS( json::canonical_from_json(val, result), json::canonical_from_json_error );
 
             std::string message;
             try {
-                json::canonical_from_json<thing>(val);
+                json::canonical_from_json(val, result);
             } catch(json::canonical_from_json_error& e) {
                 message = std::move(e).message;
             }
