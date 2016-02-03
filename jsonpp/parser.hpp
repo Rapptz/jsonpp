@@ -132,22 +132,37 @@ private:
             throw parser_error("expected number, received EOF instead", line, column);
         }
 
+        if(*str == '-') {
+            ++str; // started with -
+        }
+
+        if(*str == '0') {
+            // starting with 0
+            ++str;
+            if(*str >= '0' && *str <= '9') {
+                // leading zero
+                auto offset = column + (str - begin);
+                throw parser_error("numbers cannot start with a zero", line, offset);
+            }
+        }
+
         while(lookup.find(*str) != std::string::npos) {
             ++str;
         }
 
-        auto size = str - begin;
-        if(*begin == '0' && size > 1) {
-            throw parser_error("number cannot start with 0", line, column);
-        }
-
+        auto size = static_cast<size_t>(str - begin);
         double val = 0.0;
+        size_t idx;
         try {
             std::string temp(begin, str);
-            val = std::stod(temp);
+            val = std::stod(temp, &idx);
             column += temp.size() + 1;
         }
         catch(const std::exception&) {
+            throw parser_error("number could not be parsed properly", line, column);
+        }
+
+        if(idx != size) {
             throw parser_error("number could not be parsed properly", line, column);
         }
 
