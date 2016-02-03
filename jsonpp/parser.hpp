@@ -409,6 +409,9 @@ private:
         if(*str == '}') {
             ++str;
         }
+        else {
+            throw parser_error("expected closing brace", line, column);
+        }
     }
 
     void parse_value(value& v) {
