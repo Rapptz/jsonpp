@@ -64,7 +64,7 @@ TEST_CASE("twitter response", "[real-twitter]") {
     auto&& second = arr[1].as<json::object>();
     REQUIRE(second.count("entities"));
     REQUIRE(second.at("entities").is<json::object>());
-    REQUIRE(second.at("dne").as<std::string>("hello") == "hello");
+    REQUIRE(second["dne"].as<std::string>("hello") == "hello");
     REQUIRE(second.at("geo").is<json::object>());
     REQUIRE(second.at("retweeted").as<bool>(true) == false);
     REQUIRE(second.count("in_reply_to_user_id"));
