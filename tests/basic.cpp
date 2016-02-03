@@ -66,6 +66,35 @@ TEST_CASE("numbers", "[basic-numbers]") {
         REQUIRE(!v.is<bool>());
         REQUIRE(v.as<int>() == -10);
         REQUIRE(json::dump_string(v, minify) == "-10");
+
+        // starting with zero
+
+        REQUIRE_NOTHROW(json::parse("0.123456", v));
+        REQUIRE(v.is<int>());
+        REQUIRE(v.is<double>());
+        REQUIRE(v.is<float>());
+        REQUIRE(!v.is<json::null>());
+        REQUIRE(!v.is<std::string>());
+        REQUIRE(!v.is<const char*>());
+        REQUIRE(!v.is<json::array>());
+        REQUIRE(!v.is<json::object>());
+        REQUIRE(!v.is<bool>());
+        REQUIRE(v.as<double>() == 0.123456);
+        REQUIRE(json::dump_string(v, minify) == "0.123456");
+
+        REQUIRE_NOTHROW(json::parse("0", v));
+        REQUIRE(v.is<int>());
+        REQUIRE(v.is<double>());
+        REQUIRE(v.is<float>());
+        REQUIRE(!v.is<json::null>());
+        REQUIRE(!v.is<std::string>());
+        REQUIRE(!v.is<const char*>());
+        REQUIRE(!v.is<json::array>());
+        REQUIRE(!v.is<json::object>());
+        REQUIRE(!v.is<bool>());
+        REQUIRE(v.as<int>() == 0);
+        REQUIRE(json::dump_string(v, minify) == "0");
+
     }
 
     SECTION("writing") {
