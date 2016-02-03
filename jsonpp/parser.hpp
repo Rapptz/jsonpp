@@ -136,6 +136,11 @@ private:
             ++str;
         }
 
+        auto size = str - begin;
+        if(*begin == '0' && size > 1) {
+            throw parser_error("number cannot start with 0", line, column);
+        }
+
         double val = 0.0;
         try {
             std::string temp(begin, str);
