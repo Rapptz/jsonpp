@@ -365,6 +365,9 @@ public:
     }
 };
 
+template<typename OStream>
+inline OStream& dump(OStream& out, const value& val, format_options opt);
+
 using array  = value::array;
 using object = value::object;
 
