@@ -44,7 +44,8 @@ struct extensions {
     enum : unsigned {
         none = 0,
         comments = 1 << 1,
-        all = comments
+        trailing_comma = 1 << 2,
+        all = comments | trailing_comma
     };
 };
 
@@ -107,6 +108,16 @@ private:
             }
             ++str;
             ++column;
+        }
+    }
+
+    template<unsigned X = Flags, EnableIf<has_extension<X, extensions::trailing_comma>> = 0>
+    void check_trailing_comma(bool) {}
+
+    template<unsigned X = Flags, DisableIf<has_extension<X, extensions::trailing_comma>> = 0>
+    void check_trailing_comma(bool has_trailing_comma) {
+        if(has_trailing_comma) {
+            throw parser_error("extraneous comma found", line, column);
         }
     }
 
@@ -360,12 +371,13 @@ private:
             }
             else if(*str == ',') {
                 ++str;
+
                 // skip whitespace
                 skip_white_space();
+
                 // handle missing input
-                if(*str && *str == ']') {
-                    throw parser_error("extraneous comma spotted", line, column);
-                }
+                bool is_trailing_comma = *str && *str == ']';
+                check_trailing_comma(is_trailing_comma);
             }
 
             arr.push_back(elem);
@@ -382,6 +394,7 @@ private:
         object obj;
         std::string key;
         value elem;
+        bool last_is_comma = false;
 
         skip_white_space();
 
@@ -394,8 +407,11 @@ private:
 
             // empty object
             if(*str == '}') {
+                check_trailing_comma(last_is_comma);
                 break;
             }
+
+            last_is_comma = false;
 
             if(*str != '"') {
                 throw parser_error("expected string as key not found", line, column);
@@ -415,6 +431,8 @@ private:
                 }
             }
             else if(*str == ',') {
+                last_is_comma = true;
+                ++column;
                 ++str;
             }
             obj.emplace(key, elem);
@@ -423,6 +441,7 @@ private:
         v = obj;
         if(*str == '}') {
             ++str;
+            ++column;
         }
         else {
             throw parser_error("expected closing brace", line, column);

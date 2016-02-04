@@ -132,7 +132,7 @@ TEST_CASE("canonical", "[canonical]") {
             std::string const payload { rawtext+1, std::end(rawtext)-2 };
 
             json::value val;
-            json::parse(payload, val);
+            json::parse<json::extensions::trailing_comma>(payload, val);
             thing result { "no-one", -1, { false }, { -1 } };
             json::canonical_from_json(val, result);
             address expected { 5 }; expected.city = "Neverland";
@@ -150,7 +150,7 @@ TEST_CASE("canonical", "[canonical]") {
             std::string const payload { rawtext+1, std::end(rawtext)-2 };
 
             json::value val;
-            json::parse(payload, val);
+            json::parse<json::extensions::trailing_comma>(payload, val);
             thing result { "no-one", -1, { false }, { -1 } };
             REQUIRE_THROWS_AS( json::canonical_from_json(val, result), json::canonical_from_json_error );
 
@@ -174,7 +174,7 @@ TEST_CASE("canonical", "[canonical]") {
             std::string const payload { rawtext+1, std::end(rawtext)-2 };
 
             json::value val;
-            json::parse(payload, val);
+            json::parse<json::extensions::trailing_comma>(payload, val);
             thing result { "no-one", -1, { false }, { -1 } };
             REQUIRE_THROWS_AS( json::canonical_from_json(val, result), json::canonical_from_json_error );
 
