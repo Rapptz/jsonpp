@@ -308,7 +308,8 @@ public:
 
     template<typename T, EnableIf<is_generic<T>> = 0>
     T as() const {
-        throw std::runtime_error("calling value::as<T>() on an invalid type (use a json type instead)");
+        static_assert(dependent_false<T>::value, "calling value::as<T>() on an invalid type (use a json type instead)");
+        return {};
     }
 
     template<typename T>

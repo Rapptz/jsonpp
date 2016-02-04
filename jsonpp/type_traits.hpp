@@ -73,6 +73,9 @@ struct depend_on {
 template<typename T, typename... Dummies>
 using DependOn = typename depend_on<T, Dummies...>::type;
 
+template<typename...>
+struct dependent_false : std::false_type {};
+
 template<typename T>
 struct is_bool : std::is_same<T, bool> {};
 
