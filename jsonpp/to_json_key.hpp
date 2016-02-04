@@ -35,18 +35,28 @@ private:
         return to_json_key(std::forward<T>(value));
     }
 
-    template<typename T, typename U = Unqualified<T>, EnableIf<std::is_arithmetic<U>> = 0>
-    auto impl(choice<1>, T&& value) const -> decltype(std::to_string(std::forward<T>(value))) {
-        return std::to_string(std::forward<T>(value));
-    }
-
     template<typename T, typename U = Unqualified<T>, EnableIf<is_string<U>> = 0>
-    auto impl(choice<2>, T&& value) const -> decltype(std::forward<T>(value)) {
+    auto impl(choice<1>, T&& value) const -> decltype(std::forward<T>(value)) {
         return std::forward<T>(value);
     }
 
+    template<typename T, typename U = Unqualified<T>, EnableIf<is_bool<U>> = 0>
+    std::string impl(choice<2>, T&& value) const {
+        return std::forward<T>(value) ? "true" : "false";
+    }
+
+    template<typename T, typename U = Unqualified<T>, EnableIf<std::is_same<U, char>> = 0>
+    std::string impl(choice<3>, T&& value) const {
+        return std::string(1, std::forward<T>(value));
+    }
+
+    template<typename T, typename U = Unqualified<T>, EnableIf<std::is_arithmetic<U>> = 0>
+    auto impl(choice<4>, T&& value) const -> decltype(std::to_string(std::forward<T>(value))) {
+        return std::to_string(std::forward<T>(value));
+    }
+
     template<typename T>
-    const char* impl(choice<3>, T&&) const {
+    const char* impl(otherwise, T&&) const {
         static_assert(dependent_false<T>::value, "You must have a to_json_key free function.");
         return nullptr;
     }
