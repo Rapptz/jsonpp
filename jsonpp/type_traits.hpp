@@ -146,10 +146,16 @@ template<typename T>
 struct has_iterators : decltype(detail::has_iterators_impl::test<T>(0)) {};
 
 template<typename T>
-struct is_array : And<Or<decltype(detail::is_array_impl::test<T>(0)), std::is_array<T>>, has_iterators<T>, Not<is_string<T>>> {};
+struct is_array_like : And<Or<decltype(detail::is_array_impl::test<T>(0)), std::is_array<T>>, has_iterators<T>, Not<is_string<T>>> {};
 
 template<typename T>
-struct is_object : And<decltype(detail::is_object_impl::test<T>(0)), has_iterators<T>> {};
+struct is_object_like : And<decltype(detail::is_object_impl::test<T>(0)), has_iterators<T>> {};
+
+template<typename T>
+struct is_object : std::is_same<T, typename DependOn<value, T>::object> {};
+
+template<typename T>
+struct is_array : std::is_same<T, typename DependOn<value, T>::array> {};
 
 template<typename T>
 struct is_json : Or<is_null<T>, is_bool<T>, is_number<T>, is_string<T>, is_array<T>, is_object<T>> {};

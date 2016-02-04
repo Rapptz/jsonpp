@@ -70,10 +70,6 @@ private:
         }
         storage_type = other.storage_type;
     }
-
-    template<typename T>
-    struct is_generic : And<Not<is_string<T>>, Not<is_bool<T>>, Not<is_number<T>>,
-                            Not<is_null<T>>, Not<std::is_same<T, object>>, Not<std::is_same<T, array>>> {};
 public:
     value() JSONPP_NOEXCEPT: storage_type(type::null) {}
     value(null) JSONPP_NOEXCEPT: storage_type(type::null) {}
@@ -249,12 +245,12 @@ public:
         return storage_type == type::boolean;
     }
 
-    template<typename T, EnableIf<std::is_same<T, object>> = 0>
+    template<typename T, EnableIf<is_object<T>> = 0>
     bool is() const JSONPP_NOEXCEPT {
         return storage_type == type::object;
     }
 
-    template<typename T, EnableIf<std::is_same<T, array>> = 0>
+    template<typename T, EnableIf<is_array<T>> = 0>
     bool is() const JSONPP_NOEXCEPT {
         return storage_type == type::array;
     }
@@ -294,13 +290,13 @@ public:
         return storage.number;
     }
 
-    template<typename T, EnableIf<std::is_same<T, object>> = 0>
+    template<typename T, EnableIf<is_object<T>> = 0>
     T as() const {
         JSONPP_ASSERT(is<T>(), "called as<T> with type mismatch");
         return *(storage.obj);
     }
 
-    template<typename T, EnableIf<std::is_same<T, array>> = 0>
+    template<typename T, EnableIf<is_array<T>> = 0>
     T as() const {
         JSONPP_ASSERT(is<T>(), "called as<T> with type mismatch");
         return *(storage.arr);

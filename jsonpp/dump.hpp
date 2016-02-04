@@ -186,7 +186,7 @@ inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
     return out;
 }
 
-template<typename OStream, typename T, EnableIf<is_array<T>> = 0>
+template<typename OStream, typename T, EnableIf<is_array_like<T>> = 0>
 inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
     bool prettify = (opt.flags & opt.minify) != opt.minify;
     opt.depth += prettify;
@@ -231,7 +231,7 @@ inline void key(OStream& out, const T& t, const format_options& opt) {
     dump(out, t, opt);
 }
 
-template<typename OStream, typename T, EnableIf<is_object<T>> = 0>
+template<typename OStream, typename T, EnableIf<is_object_like<T>> = 0>
 inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
     bool prettify = (opt.flags & format_options::minify) != format_options::minify;
     opt.depth += prettify;
