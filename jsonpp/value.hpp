@@ -259,7 +259,7 @@ public:
         return storage_type == type::array;
     }
 
-    template<typename T, EnableIf<is_generic<T>> = 0>
+    template<typename T, DisableIf<is_json<T>> = 0>
     bool is() const JSONPP_NOEXCEPT {
         return false;
     }
@@ -306,7 +306,7 @@ public:
         return *(storage.arr);
     }
 
-    template<typename T, EnableIf<is_generic<T>> = 0>
+    template<typename T, DisableIf<is_json<T>> = 0>
     T as() const {
         static_assert(dependent_false<T>::value, "calling value::as<T>() on an invalid type (use a json type instead)");
         return {};

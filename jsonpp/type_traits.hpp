@@ -152,6 +152,9 @@ template<typename T>
 struct is_object : And<decltype(detail::is_object_impl::test<T>(0)), has_iterators<T>> {};
 
 template<typename T>
+struct is_json : Or<is_null<T>, is_bool<T>, is_number<T>, is_string<T>, is_array<T>, is_object<T>> {};
+
+template<typename T>
 struct has_to_json : decltype(has_to_json_impl::test<T>(0)) {};
 
 enum class type {

@@ -37,9 +37,6 @@ struct to_json_algo;
 
 struct canonical_to_json_type {
 private:
-    template<typename Type>
-    using is_json = Or<is_null<Type>, is_bool<Type>, is_number<Type>, is_string<Type>, is_array<Type>, is_object<Type>>;
-
     template<typename Source, EnableIf<is_json<Source>> = 0>
     static value impl(Source const& source, int)
     { return source; }
@@ -112,17 +109,7 @@ template<typename T> constexpr const char* type_name<T, EnableIf<is_array<T>>>::
 template<typename Dest>
 struct canonical_from_json_type {
 private:
-    template<typename Dep>
-    using is_json = Or<
-        is_null<DependOn<Dest, Dep>>,
-        is_bool<DependOn<Dest, Dep>>,
-        is_number<DependOn<Dest, Dep>>,
-        is_string<DependOn<Dest, Dep>>,
-        is_array<DependOn<Dest, Dep>>,
-        is_object<DependOn<Dest, Dep>>
-    >;
-
-    template<typename Dep = void, EnableIf<is_json<Dep>> = 0>
+    template<typename Dep = Dest, EnableIf<is_json<Dep>> = 0>
     static void impl(value const& v, Dest& result, int)
     {
         if(!v.is<Dest>()) {
@@ -133,7 +120,7 @@ private:
         result = v.as<Dest>();
     }
 
-    template<typename Dep = void, DisableIf<is_json<Dep>> = 0>
+    template<typename Dep = Dest, DisableIf<is_json<Dep>> = 0>
     static void impl(value const& v, Dest& result, long)
     {
         if(!v.is<object>()) {

@@ -58,7 +58,6 @@ public:
         return message.c_str();
     }
 };
-
 } // json
 
 #endif // JSONPP_ERROR_HPP
