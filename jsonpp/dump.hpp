@@ -24,6 +24,7 @@
 
 #include "type_traits.hpp"
 #include "detail/unicode.hpp"
+#include "to_json_key.hpp"
 #include <string>
 #include <sstream>
 #include <iosfwd>
@@ -224,16 +225,6 @@ inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
     return out;
 }
 
-template<typename OStream, typename T, EnableIf<std::is_arithmetic<T>> = 0>
-inline void key(OStream& out, const T& t, const format_options&) {
-    out << '"' << std::to_string(t) << '"';
-}
-
-template<typename OStream, typename T, DisableIf<std::is_arithmetic<T>> = 0>
-inline void key(OStream& out, const T& t, const format_options& opt) {
-    dump(out, t, opt);
-}
-
 template<typename OStream, typename T, EnableIf<is_object_like<T>> = 0>
 inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
     using value_type = typename T::mapped_type;
@@ -260,7 +251,7 @@ inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
             detail::indent(out, opt);
         }
 
-        key(out, elem.first, opt);
+        dump(out, ::json::to_json_key(elem.first), opt);
         out << ':';
 
         if(prettify) {

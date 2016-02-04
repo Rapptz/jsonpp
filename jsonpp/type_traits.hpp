@@ -104,6 +104,17 @@ struct has_to_json_impl {
     static std::false_type test(...);
 };
 
+// check if a type has a proper to_json_key function call
+struct has_to_json_key_impl {
+    template<typename T, typename X = decltype(to_json_key(std::declval<T&>()))>
+    static is_string<X> test(int);
+    template<typename...>
+    static std::false_type test(...);
+};
+
+template<typename T>
+struct has_to_json_key : decltype(has_to_json_key_impl::test<T>(0)) {};
+
 namespace detail {
 using std::end;
 using std::begin;
@@ -116,9 +127,6 @@ struct has_iterators_impl {
     template<typename...>
     static std::false_type test(...);
 };
-
-template<typename T>
-struct is_possible_key_type : Or<is_bool<T>, is_number<T>, is_string<T>, is_value<T>> {};
 
 // a trait to try to guess for a vector as close as possible
 struct is_array_impl {
@@ -137,7 +145,7 @@ struct is_object_impl {
                          typename K = typename U::key_type,
                          typename V = typename U::mapped_type,
                          typename C = typename U::key_compare>
-    static is_possible_key_type<K> test(int);
+    static std::true_type test(int);
     template<typename...>
     static std::false_type test(...);
 };
