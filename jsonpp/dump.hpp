@@ -188,6 +188,9 @@ inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
 
 template<typename OStream, typename T, EnableIf<is_array_like<T>> = 0>
 inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
+    using value_type = typename array_value_type<T>::type;
+    static_assert(is_regular_serialisable<value_type>::value, "The array's value type must be JSON serialisable.");
+
     bool prettify = (opt.flags & opt.minify) != opt.minify;
     opt.depth += prettify;
     out << '[';
@@ -233,6 +236,8 @@ inline void key(OStream& out, const T& t, const format_options& opt) {
 
 template<typename OStream, typename T, EnableIf<is_object_like<T>> = 0>
 inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
+    using value_type = typename T::mapped_type;
+    static_assert(is_regular_serialisable<value_type>::value, "The map's mapped type must be JSON serialisable.");
     bool prettify = (opt.flags & format_options::minify) != format_options::minify;
     opt.depth += prettify;
     out << '{';

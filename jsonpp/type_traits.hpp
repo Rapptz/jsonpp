@@ -25,6 +25,7 @@
 #include "config.hpp"
 #include <type_traits>
 #include <string>
+#include <iterator>
 
 namespace json {
 template<typename T>
@@ -96,7 +97,7 @@ template<typename T, typename U = typename std::decay<T>::type>
 struct is_string : Or<std::is_same<U, std::string>, std::is_same<U, const char*>, std::is_same<U, char*>> {};
 
 struct has_to_json_impl {
-    template<typename T, typename U = decltype(to_json(std::declval<T>()))>
+    template<typename T, typename U = decltype(to_json(std::declval<T&>()))>
     static is_value<U> test(int);
 
     template<typename...>
@@ -109,8 +110,8 @@ using std::begin;
 
 // checks if a type has iterator support
 struct has_iterators_impl {
-    template<typename T, typename B = decltype(begin(std::declval<T>())),
-                         typename E = decltype(end(std::declval<T>()))>
+    template<typename T, typename B = decltype(begin(std::declval<T&>())),
+                         typename E = decltype(end(std::declval<T&>()))>
     static std::true_type test(int);
     template<typename...>
     static std::false_type test(...);
@@ -123,8 +124,8 @@ struct is_possible_key_type : Or<is_bool<T>, is_number<T>, is_string<T>, is_valu
 struct is_array_impl {
     template<typename T, typename U = Unqualified<T>,
                          typename V = typename U::value_type,
-                         typename S = decltype(std::declval<U>().shrink_to_fit()),
-                         typename R = decltype(std::declval<U>().reserve(0))>
+                         typename S = decltype(std::declval<U&>().shrink_to_fit()),
+                         typename R = decltype(std::declval<U&>().reserve(0))>
     static std::true_type test(int);
     template<typename...>
     static std::false_type test(...);
@@ -169,6 +170,43 @@ enum class type {
 
 template<unsigned Flags, unsigned Flag>
 struct has_extension : Bool<(Flags & Flag) == Flag> {};
+
+template<typename T, typename U = Unqualified<T>>
+struct is_regular_serialisable : Or<has_to_json<U>, is_json<U>, is_value<U>> {};
+
+struct is_canonically_serialisable_impl {
+    template<typename T, typename X = decltype(canonical_to_json(std::declval<T&>()))>
+    static Or<is_json<X>, is_value<X>> test(int);
+    template<typename...>
+    static std::false_type test(...);
+};
+
+template<typename T>
+struct is_canonically_serialisable : decltype(is_canonically_serialisable_impl::test<T>(0)) {};
+
+template<typename T>
+struct is_serialisable : Or<is_regular_serialisable<T>, is_canonically_serialisable<T>> {};
+
+template<typename T>
+struct lazy_value_type {
+    using type = typename T::value_type;
+};
+
+template<typename T>
+struct lazy_array_type {};
+
+template<typename T>
+struct lazy_array_type<T[]> {
+    static_assert(dependent_false<T>::value, "The array type must have extent.");
+};
+
+template<typename T, unsigned N>
+struct lazy_array_type<T[N]> {
+    using type = T;
+};
+
+template<typename T>
+using array_value_type = If<std::is_array<T>, lazy_array_type<T>, lazy_value_type<T>>;
 } // json
 
 #endif // JSON_TYPE_TRAITS_HPP
