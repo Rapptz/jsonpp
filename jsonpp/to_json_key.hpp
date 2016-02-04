@@ -54,12 +54,6 @@ private:
     auto impl(choice<4>, T&& value) const -> decltype(std::to_string(std::forward<T>(value))) {
         return std::to_string(std::forward<T>(value));
     }
-
-    template<typename T>
-    const char* impl(otherwise, T&&) const {
-        static_assert(dependent_false<T>::value, "You must have a to_json_key free function.");
-        return nullptr;
-    }
 public:
     template<typename T>
     auto operator()(T&& value) const -> decltype(impl(select_overload{}, std::forward<T>(value))) {
