@@ -144,7 +144,10 @@ struct is_object_impl {
     template<typename T, typename U = Unqualified<T>,
                          typename K = typename U::key_type,
                          typename V = typename U::mapped_type,
-                         typename C = typename U::key_compare>
+                         typename C = typename U::key_compare,
+                         typename P = typename U::value_type,
+                         typename F = decltype(std::declval<P&>().first),
+                         typename S = decltype(std::declval<P&>().second)>
     static std::true_type test(int);
     template<typename...>
     static std::false_type test(...);
