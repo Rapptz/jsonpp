@@ -1,6 +1,6 @@
 // The MIT License (MIT)
 
-// Copyright (c) 2016 Rapptz
+// Copyright (c) 2014-2016 Danny Y.
 
 // Permission is hereby granted, free of charge, to any person obtaining a copy of
 // this software and associated documentation files (the "Software"), to deal in
@@ -22,8 +22,9 @@
 #ifndef JSON_CANONICAL_HPP
 #define JSON_CANONICAL_HPP
 
-#include "jsonpp/error.hpp"
-#include "jsonpp/value.hpp"
+#include "error.hpp"
+#include "value.hpp"
+#include "type_name.hpp"
 #include <sstream>
 
 namespace json {
@@ -72,39 +73,6 @@ struct to_json_algo {
 };
 
 struct from_json_algo;
-
-template<typename T, typename Sfinae = int>
-struct type_name;
-
-template<typename T> struct type_name<T, EnableIf<is_null<T>>> {
-    static constexpr const char* value = "null";
-};
-template<typename T> constexpr const char* type_name<T, EnableIf<is_null<T>>>::value;
-
-template<typename T> struct type_name<T, EnableIf<is_bool<T>>> {
-    static constexpr const char* value = "boolean";
-};
-template<typename T> constexpr const char* type_name<T, EnableIf<is_bool<T>>>::value;
-
-template<typename T> struct type_name<T, EnableIf<is_number<T>>> {
-    static constexpr const char* value = "number";
-};
-template<typename T> constexpr const char* type_name<T, EnableIf<is_number<T>>>::value;
-
-template<typename T> struct type_name<T, EnableIf<is_string<T>>> {
-    static constexpr const char* value = "string";
-};
-template<typename T> constexpr const char* type_name<T, EnableIf<is_string<T>>>::value;
-
-template<typename T> struct type_name<T, EnableIf<is_object<T>>> {
-    static constexpr const char* value = "object";
-};
-template<typename T> constexpr const char* type_name<T, EnableIf<is_object<T>>>::value;
-
-template<typename T> struct type_name<T, EnableIf<is_array<T>>> {
-    static constexpr const char* value = "array";
-};
-template<typename T> constexpr const char* type_name<T, EnableIf<is_array<T>>>::value;
 
 template<typename Dest>
 struct canonical_from_json_type {
