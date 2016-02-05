@@ -30,7 +30,7 @@
 namespace json {
 
 template<typename Type>
-struct canonical_recipe {};
+struct canonical_schema {};
 
 namespace detail {
 
@@ -46,7 +46,7 @@ private:
     static value impl(Source const& source, long)
     {
         DependOn<to_json_algo, Source> algo {};
-        canonical_recipe<Source> {}(algo, source);
+        canonical_schema<Source> {}(algo, source);
         return std::move(algo).result;
     }
 
@@ -99,7 +99,7 @@ private:
 
         auto&& obj = v.as<object>();
         DependOn<from_json_algo, Dep> algo { obj };
-        canonical_recipe<Dest> {}(algo, result);
+        canonical_schema<Dest> {}(algo, result);
     }
 
 public:

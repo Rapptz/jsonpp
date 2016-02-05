@@ -11,7 +11,7 @@ struct color {
 constexpr bool operator==(color const& lhs, color const& rhs)
 { return lhs.is_it_blue == rhs.is_it_blue; }
 
-struct color_recipe {
+struct color_schema {
     template<typename Algo>
     constexpr void operator()(Algo& algo, color& c) const
     {
@@ -35,7 +35,7 @@ struct address {
 bool operator==(address const& lhs, address const& rhs)
 { return std::tie(lhs.house_number, lhs.city) == std::tie(rhs.house_number, rhs.city); }
 
-struct address_recipe {
+struct address_schema {
     template<typename Algo>
     constexpr void operator()(Algo& algo, address& a) const
     {
@@ -63,7 +63,7 @@ bool operator==(thing const& lhs, thing const& rhs)
         == std::tie(rhs.name, rhs.number_of_ants, rhs.dress, rhs.location);
 }
 
-struct thing_recipe {
+struct thing_schema {
     template<typename Algo>
     constexpr void operator()(Algo& algo, thing& t) const
     {
@@ -86,9 +86,9 @@ struct thing_recipe {
 } // namespace
 
 namespace json {
-template<> struct canonical_recipe<color>: color_recipe {};
-template<> struct canonical_recipe<address>: address_recipe {};
-template<> struct canonical_recipe<thing>: thing_recipe {};
+template<> struct canonical_schema<color>: color_schema {};
+template<> struct canonical_schema<address>: address_schema {};
+template<> struct canonical_schema<thing>: thing_schema {};
 } // json
 
 TEST_CASE("canonical", "[canonical]") {
