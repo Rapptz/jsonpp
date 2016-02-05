@@ -115,6 +115,11 @@ struct has_to_json_key_impl {
 template<typename T>
 struct has_to_json_key : decltype(has_to_json_key_impl::test<T>(0)) {};
 
+template<typename Type>
+struct canonical_schema {
+    using unspecialized = Type;
+};
+
 namespace detail {
 using std::end;
 using std::begin;
@@ -185,18 +190,18 @@ struct has_extension : Bool<(Flags & Flag) == Flag> {};
 template<typename T, typename U = Unqualified<T>>
 struct is_regular_serialisable : Or<has_to_json<U>, is_json<U>, is_value<U>> {};
 
-struct is_canonically_serialisable_impl {
-    template<typename T, typename X = decltype(canonical_to_json(std::declval<T&>()))>
-    static Or<is_json<X>, is_value<X>> test(int);
+struct has_canonical_schema_impl {
+    template<typename T, typename X = typename canonical_schema<T>::unspecialized>
+    static std::false_type test(int);
     template<typename...>
-    static std::false_type test(...);
+    static std::true_type test(...);
 };
 
 template<typename T>
-struct is_canonically_serialisable : decltype(is_canonically_serialisable_impl::test<T>(0)) {};
+struct has_canonical_schema : decltype(has_canonical_schema_impl::test<T>(0)) {};
 
 template<typename T>
-struct is_serialisable : Or<is_regular_serialisable<T>, is_canonically_serialisable<T>> {};
+struct is_serialisable : Or<is_regular_serialisable<T>, has_canonical_schema<T>> {};
 
 template<typename T>
 struct lazy_value_type {

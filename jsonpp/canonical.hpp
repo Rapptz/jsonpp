@@ -28,12 +28,7 @@
 #include <sstream>
 
 namespace json {
-
-template<typename Type>
-struct canonical_schema {};
-
 namespace detail {
-
 struct to_json_algo;
 
 struct canonical_to_json_type {
