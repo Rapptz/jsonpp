@@ -200,8 +200,28 @@ struct has_canonical_schema_impl {
 template<typename T>
 struct has_canonical_schema : decltype(has_canonical_schema_impl::test<T>(0)) {};
 
+template<typename Type>
+struct json_schema {
+    using unspecialized = Type;
+};
+
+struct has_json_schema_impl {
+    template<typename T, typename X = typename json_schema<T>::unspecialized>
+    static std::false_type test(int);
+    template<typename...>
+    static std::true_type test(...);
+};
+
 template<typename T>
-struct is_serialisable : Or<is_regular_serialisable<T>, has_canonical_schema<T>> {};
+struct has_json_schema : decltype(has_json_schema_impl::test<T>(0)) {};
+
+template<typename T>
+struct is_serialisable : Or<is_regular_serialisable<T>, has_canonical_schema<T>, has_json_schema<T>> {};
+
+template<typename T>
+struct is_deserialisable : Or<is_json<T>, Not<std::is_array<T>>,
+                              has_canonical_schema<T>, is_object_like<T>,
+                              is_array_like<T>, has_json_schema<T>> {};
 
 template<typename T>
 struct lazy_value_type {
