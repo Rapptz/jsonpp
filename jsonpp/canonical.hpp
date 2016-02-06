@@ -29,7 +29,7 @@
 
 namespace json {
 namespace detail {
-struct to_json_algo;
+struct canonical_to_json_algo;
 
 struct canonical_to_json_type {
 private:
@@ -40,7 +40,7 @@ private:
     template<typename Source, DisableIf<is_json<Source>> = 0>
     static value impl(Source const& source, long)
     {
-        DependOn<to_json_algo, Source> algo {};
+        DependOn<canonical_to_json_algo, Source> algo {};
         canonical_schema<Source> {}(algo, source);
         return std::move(algo).result;
     }
@@ -57,7 +57,7 @@ constexpr detail::canonical_to_json_type canonical_to_json {};
 
 namespace detail {
 
-struct to_json_algo {
+struct canonical_to_json_algo {
     object result;
 
     template<typename Source>
@@ -67,7 +67,7 @@ struct to_json_algo {
     }
 };
 
-struct from_json_algo;
+struct canonical_from_json_algo;
 
 template<typename Dest>
 struct canonical_from_json_type {
@@ -93,7 +93,7 @@ private:
         }
 
         auto&& obj = v.as<object>();
-        DependOn<from_json_algo, Dep> algo { obj };
+        DependOn<canonical_from_json_algo, Dep> algo { obj };
         canonical_schema<Dest> {}(algo, result);
     }
 
@@ -114,14 +114,14 @@ public:
 } // detail
 
 template<typename Dest>
-Dest canonical_from_json(value const& v)
+inline Dest canonical_from_json(value const& v)
 {
     static constexpr detail::canonical_from_json_type<Dest> call;
     return call(v);
 }
 
 template<typename Dest>
-void canonical_from_json(value const& v, Dest& result)
+inline void canonical_from_json(value const& v, Dest& result)
 {
     static constexpr detail::canonical_from_json_type<Dest> call;
     call(v, result);
@@ -129,7 +129,7 @@ void canonical_from_json(value const& v, Dest& result)
 
 namespace detail {
 
-struct from_json_algo {
+struct canonical_from_json_algo {
     object obj;
 
     template<typename Value>
