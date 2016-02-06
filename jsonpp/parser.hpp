@@ -267,6 +267,9 @@ private:
 
         std::string result;
 
+        // give an initial buffer of 64 to allow constant reallocation
+        result.reserve(64);
+
         // begin parsing
         while(true) {
             ++column;
@@ -329,7 +332,8 @@ private:
             }
         }
 
-        v = result;
+        result.shrink_to_fit();
+        v = std::move(result);
         ++copy;
         str = copy;
     }
@@ -355,7 +359,6 @@ private:
     void parse_array(value& v) {
         ++str;
         array arr;
-        value elem;
         skip_white_space();
 
         if(*str == '\0') {
@@ -363,6 +366,7 @@ private:
         }
 
         while (*str && *str != ']') {
+            value elem;
             parse_value(elem);
             if(*str != ',') {
                 if(*str != ']') {
@@ -380,10 +384,10 @@ private:
                 check_trailing_comma(is_trailing_comma);
             }
 
-            arr.push_back(elem);
+            arr.push_back(std::move(elem));
         }
 
-        v = arr;
+        v = std::move(arr);
         if(*str == ']') {
             ++str;
         }
@@ -392,8 +396,6 @@ private:
     void parse_object(value& v) {
         ++str;
         object obj;
-        std::string key;
-        value elem;
         bool last_is_comma = false;
 
         skip_white_space();
@@ -403,6 +405,9 @@ private:
         }
 
         while(*str) {
+            std::string key;
+            value elem;
+
             skip_white_space();
 
             // empty object
@@ -435,10 +440,10 @@ private:
                 ++column;
                 ++str;
             }
-            obj.emplace(key, elem);
+            obj.emplace(std::move(key), std::move(elem));
         }
 
-        v = obj;
+        v = std::move(obj);
         if(*str == '}') {
             ++str;
             ++column;
