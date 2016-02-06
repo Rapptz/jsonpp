@@ -231,7 +231,7 @@ private:
             }
 
             // get the  low surrogate pair
-            if(*(copy + 1) != '\\' && *(copy + 2) != 'u') {
+            if(*copy != '\\' && *(copy + 1) != 'u') {
                 throw parser_error("low surrogate pair expected but not found", line, column);
             }
 

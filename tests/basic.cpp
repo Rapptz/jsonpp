@@ -184,6 +184,18 @@ TEST_CASE("strings", "[basic-strings]") {
         REQUIRE(str2 == u8"\t\n\b\"\u2000\u1234");
     }
 
+    SECTION("surrogate pairs") {
+        static const auto& name = R"("Xena \ud83d\udca9\ud83c\udf77")";
+        REQUIRE_NOTHROW(json::parse(name, v));
+        REQUIRE(!v.is<json::array>());
+        REQUIRE(!v.is<double>());
+        REQUIRE(v.is<std::string>());
+        REQUIRE(v.is<const char*>());
+        REQUIRE(!v.is<json::null>());
+        REQUIRE(!v.is<json::object>());
+        REQUIRE(v.as<std::string>() == "Xena \xF0\x9F\x92\xA9\xF0\x9F\x8D\xB7");
+    }
+
     SECTION("regular string") {
         REQUIRE_NOTHROW(json::parse("\t\n\n\n\t\n\n   \"hello world\"\n\t\n\n", v));
         REQUIRE(!v.is<json::array>());
