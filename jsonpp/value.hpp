@@ -87,9 +87,9 @@ public:
         storage.boolean = b;
     }
 
-    template<typename T, EnableIf<is_string<T>, Not<is_bool<T>>> = 0>
-    value(const T& str): storage_type(type::string) {
-        storage.str = new std::string(str);
+    template<typename T, typename U = Unqualified<T>, EnableIf<is_string<U>, Not<is_bool<U>>> = 0>
+    value(T&& value): storage_type(type::string) {
+        storage.str = new std::string(std::forward<T>(value));
     }
 
     value(const char* str, std::size_t sz): storage_type(type::string) {
@@ -103,12 +103,12 @@ public:
     template<typename T, EnableIf<has_to_json<T>, Not<is_string<T>>, Not<is_bool<T>>> = 0>
     value(const T& t): value(to_json(t)) {}
 
-    value(const array& arr): storage_type(type::array) {
-        storage.arr = new array(arr);
+    value(array arr): storage_type(type::array) {
+        storage.arr = new array(std::move(arr));
     }
 
-    value(const object& obj): storage_type(type::object) {
-        storage.obj = new object(obj);
+    value(object obj): storage_type(type::object) {
+        storage.obj = new object(std::move(obj));
     }
 
     value(std::initializer_list<array::value_type> l): storage_type(type::array) {
