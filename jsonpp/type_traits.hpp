@@ -84,6 +84,9 @@ template<typename T>
 struct is_number : And<std::is_arithmetic<T>, Not<is_bool<T>>> {};
 
 using null = decltype(nullptr);
+using boolean = bool;
+using string = std::string;
+using number = double;
 
 template<typename T>
 struct is_null : std::is_same<T, null> {};
