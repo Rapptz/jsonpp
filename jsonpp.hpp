@@ -24,5 +24,6 @@
 
 #include "jsonpp/value.hpp"
 #include "jsonpp/parser.hpp"
+#include "jsonpp/convert.hpp"
 
 #endif // JSONPP_HPP
