@@ -72,7 +72,11 @@ private:
     }
 public:
     value() JSONPP_NOEXCEPT: storage_type(type::null) {}
-    value(null) JSONPP_NOEXCEPT: storage_type(type::null) {}
+
+    // to make sure that 0 and pointer types don't become valid candidates
+    // for the conversion of a json value, we template it.
+    template<typename T, EnableIf<is_null<T>> = 0>
+    value(T) JSONPP_NOEXCEPT: storage_type(type::null) {}
 
     ~value() {
         clear();
@@ -359,7 +363,32 @@ public:
             return out;
         }
     }
+
+    friend bool operator==(const value& lhs, const value& rhs) JSONPP_NOEXCEPT {
+        if(lhs.storage_type != rhs.storage_type) {
+            return false;
+        }
+
+        switch(lhs.storage_type) {
+        case type::array:
+            return *lhs.storage.arr == *rhs.storage.arr;
+        case type::object:
+            return *lhs.storage.obj == *rhs.storage.obj;
+        case type::string:
+            return *lhs.storage.str == *rhs.storage.str;
+        case type::boolean:
+            return lhs.storage.boolean == rhs.storage.boolean;
+        case type::number:
+            return lhs.storage.number == rhs.storage.number;
+        default:
+            return true;
+        }
+    }
 };
+
+inline bool operator!=(const value& lhs, const value& rhs) JSONPP_NOEXCEPT {
+    return !(lhs == rhs);
+}
 
 template<typename OStream>
 inline OStream& dump(OStream& out, const value& val, format_options opt);

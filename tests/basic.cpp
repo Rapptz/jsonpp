@@ -40,6 +40,7 @@ TEST_CASE("numbers", "[basic-numbers]") {
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
         REQUIRE(v.as<int>() == 10);
+        REQUIRE(v == 10);
         REQUIRE(json::dump_string(v, minify) == "10");
 
         REQUIRE_NOTHROW(json::parse("\t\t\n2.14567e+101", v));
@@ -52,6 +53,7 @@ TEST_CASE("numbers", "[basic-numbers]") {
         REQUIRE(!v.is<json::array>());
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
+        REQUIRE(v == 2.14567e+101);
         REQUIRE(json::dump_string(v, minify) == "2.14567e+101");
 
         REQUIRE_NOTHROW(json::parse("\t\n\n-10", v));
@@ -65,6 +67,7 @@ TEST_CASE("numbers", "[basic-numbers]") {
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
         REQUIRE(v.as<int>() == -10);
+        REQUIRE(v == -10);
         REQUIRE(json::dump_string(v, minify) == "-10");
 
         // starting with zero
@@ -80,6 +83,7 @@ TEST_CASE("numbers", "[basic-numbers]") {
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
         REQUIRE(v.as<double>() == 0.123456);
+        REQUIRE(v == 0.123456);
         REQUIRE(json::dump_string(v, minify) == "0.123456");
 
         REQUIRE_NOTHROW(json::parse("0", v));
@@ -93,6 +97,7 @@ TEST_CASE("numbers", "[basic-numbers]") {
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
         REQUIRE(v.as<int>() == 0);
+        REQUIRE(v == 0);
         REQUIRE(json::dump_string(v, minify) == "0");
 
     }
@@ -109,6 +114,7 @@ TEST_CASE("numbers", "[basic-numbers]") {
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
         REQUIRE(v.as<int>() == 10);
+        REQUIRE(v == 10);
         REQUIRE(json::dump_string(v, minify) == "10");
 
         v = 1.23456;
@@ -121,6 +127,7 @@ TEST_CASE("numbers", "[basic-numbers]") {
         REQUIRE(!v.is<json::array>());
         REQUIRE(!v.is<json::object>());
         REQUIRE(!v.is<bool>());
+        REQUIRE(v == 1.23456);
         REQUIRE(json::dump_string(v, minify) == "1.23456");
     }
 
