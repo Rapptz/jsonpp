@@ -142,7 +142,7 @@ private:
             throw from_json_error("expected object, received " + v.type_name() + " instead");
         }
 
-        DependOn<from_json_algo, T> algo { v.as<object>() };
+        DependOn<from_json_algo, T> algo { v.get<object>() };
         json_schema<T>{}(algo, dest);
     }
 public:
@@ -185,7 +185,7 @@ struct to_json_algo {
 };
 
 struct from_json_algo {
-    object obj;
+    const object& obj;
 
     template<typename Value>
     void member(const char* name, Value& value) const {

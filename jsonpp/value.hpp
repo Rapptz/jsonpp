@@ -39,6 +39,13 @@ public:
     using object = std::map<std::string, value>;
     using array  = std::vector<value>;
 private:
+    template<typename T> struct type_tag {};
+
+    template<typename T>
+    using is_valid_getter = Or<std::is_same<T, double>, std::is_same<T, std::string>,
+                               std::is_same<T, array>, std::is_same<T, object>,
+                               std::is_same<T, bool>>;
+
     union storage_t {
         double number;
         bool boolean;
@@ -69,6 +76,46 @@ private:
             break;
         }
         storage_type = other.storage_type;
+    }
+
+    const double& getter(type_tag<double>) const {
+        return storage.number;
+    }
+
+    double& getter(type_tag<double>) {
+        return storage.number;
+    }
+
+    const std::string& getter(type_tag<std::string>) const {
+        return *(storage.str);
+    }
+
+    std::string& getter(type_tag<std::string>) {
+        return *(storage.str);
+    }
+
+    const bool& getter(type_tag<bool>) const {
+        return storage.boolean;
+    }
+
+    bool& getter(type_tag<bool>) {
+        return storage.boolean;
+    }
+
+    const array& getter(type_tag<array>) const {
+        return *(storage.arr);
+    }
+
+    array& getter(type_tag<array>) {
+        return *(storage.arr);
+    }
+
+    const object& getter(type_tag<object>) const {
+        return *(storage.obj);
+    }
+
+    object& getter(type_tag<object>) {
+        return *(storage.obj);
     }
 public:
     value() JSONPP_NOEXCEPT: storage_type(type::null) {}
@@ -315,6 +362,20 @@ public:
     template<typename T>
     T as(Identity<T>&& def) const {
         return is<T>() ? as<T>() : std::forward<T>(def);
+    }
+
+    template<typename T>
+    auto get() const -> decltype(getter(type_tag<T>{})) {
+        static_assert(is_valid_getter<T>::value, "Invalid getter passed. Must be boolean, number, array, object or string.");
+        JSONPP_ASSERT(is<T>(), "called get<T> with type mismatch");
+        return getter(type_tag<T>{});
+    }
+
+    template<typename T>
+    auto get() -> decltype(getter(type_tag<T>{})) {
+        static_assert(is_valid_getter<T>::value, "Invalid getter passed. Must be boolean, number, array, object or string.");
+        JSONPP_ASSERT(is<T>(), "called get<T> with type mismatch");
+        return getter(type_tag<T>{});
     }
 
     template<typename T, EnableIf<is_string<T>> = 0>
