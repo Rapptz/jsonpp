@@ -195,7 +195,7 @@ struct from_json_algo {
         }
         catch(from_json_error& e) {
             std::ostringstream fmt;
-            fmt << "bad member '" << name << "': " << std::move(e).message;
+            fmt << "at key '" << name << "': " << std::move(e).message;
             e.message = std::move(fmt).str();
             throw;
         }
@@ -205,7 +205,7 @@ struct from_json_algo {
         auto it = obj.find(name);
         if(it == obj.end()) {
             std::ostringstream fmt;
-            fmt << "missing member '" << name << '\'';
+            fmt << "missing key '" << name << '\'';
             throw from_json_error{ std::move(fmt).str() };
         }
         return it->second;
