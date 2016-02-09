@@ -189,15 +189,9 @@ struct from_json_algo {
 
     template<typename Value>
     void member(const char* name, Value& value) const {
-        auto it = obj.find(name);
-        if(it == obj.end()) {
-            std::ostringstream fmt;
-            fmt << "missing member '" << name << '\'';
-            throw from_json_error{ std::move(fmt).str() };
-        }
-
+        auto&& js = value_at(name);
         try {
-            from_json(it->second, value);
+            from_json(js, value);
         }
         catch(from_json_error& e) {
             std::ostringstream fmt;
@@ -205,6 +199,20 @@ struct from_json_algo {
             e.message = std::move(fmt).str();
             throw;
         }
+    }
+
+    const value& value_at(const char* name) const {
+        auto it = obj.find(name);
+        if(it == obj.end()) {
+            std::ostringstream fmt;
+            fmt << "missing member '" << name << '\'';
+            throw from_json_error{ std::move(fmt).str() };
+        }
+        return it->second;
+    }
+
+    bool has_key(const char* name) const {
+        return obj.count(name);
     }
 };
 } // detail
