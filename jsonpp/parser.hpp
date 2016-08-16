@@ -28,6 +28,7 @@
 #include <iosfwd>
 
 namespace json {
+namespace detail {
 inline bool is_space(char ch) {
     switch(ch) {
     case 0x0D: // carriage return
@@ -39,6 +40,30 @@ inline bool is_space(char ch) {
         return false;
     }
 }
+
+inline bool is_float(char ch) {
+    switch(ch) {
+    case 0x30: // 0
+    case 0x31: // 1
+    case 0x32: // 2
+    case 0x33: // 3
+    case 0x34: // 4
+    case 0x35: // 5
+    case 0x36: // 6
+    case 0x37: // 7
+    case 0x38: // 8
+    case 0x39: // 9
+    case 0x2B: // +
+    case 0x2D: // -
+    case 0x2E: // .
+    case 0x45: // E
+    case 0x65: // e
+        return true;
+    default:
+        return false;
+    }
+}
+} // detail
 
 struct extensions {
     enum : unsigned {
@@ -99,7 +124,7 @@ private:
     void skip_white_space() {
         while(*str != '\0') {
             skip_comments();
-            if (!is_space(*str)) {
+            if (!detail::is_space(*str)) {
                 return;
             }
             if(*str == 0x0A) {
@@ -137,7 +162,6 @@ private:
     }
 
     void parse_number(value& v) {
-        static const std::string lookup = "0123456789eE+-.";
         const char* begin = str;
         if(*begin == '\0') {
             throw parser_error("expected number, received EOF instead", line, column);
@@ -157,7 +181,7 @@ private:
             }
         }
 
-        while(lookup.find(*str) != std::string::npos) {
+        while(detail::is_float(*str)) {
             ++str;
         }
 
