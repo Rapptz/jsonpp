@@ -273,7 +273,6 @@ private:
         // begin parsing
         while(true) {
             ++column;
-            bool increment_string = true;
             auto byte = static_cast<unsigned char>(*copy);
 
             if(byte <= 0x1F) {
@@ -297,38 +296,41 @@ private:
             switch(*copy) {
             case '/':
                 result.push_back('/');
+                ++copy;
                 break;
             case '\\':
                 result.push_back('\\');
+                ++copy;
                 break;
             case '"':
                 result.push_back('\"');
+                ++copy;
                 break;
             case 'f':
                 result.push_back('\f');
+                ++copy;
                 break;
             case 'n':
                 result.push_back('\n');
+                ++copy;
                 break;
             case 'r':
                 result.push_back('\r');
+                ++copy;
                 break;
             case 't':
                 result.push_back('\t');
+                ++copy;
                 break;
             case 'b':
                 result.push_back('\b');
+                ++copy;
                 break;
             case 'u':
                 parse_codepoint(copy, result);
-                increment_string = false;
                 break;
             default:
                 throw parser_error("improper or incomplete escape character found", line, column);
-            }
-
-            if(increment_string) {
-                ++copy;
             }
         }
 
