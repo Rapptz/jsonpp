@@ -16,7 +16,7 @@ parser.add_argument('--quiet', help='suppress all output', action='store_true')
 parser.add_argument('--strip', '-s', help='strip all doc comments from output', action='store_true')
 args = parser.parse_args()
 
-script_path = os.path.dirname(os.path.realpath(__file__))
+script_path = os.path.normpath(os.path.dirname(os.path.realpath(__file__)))
 working_dir = os.getcwd()
 os.chdir(script_path)
 
@@ -64,7 +64,7 @@ def get_include(line, base_path):
     local_match = local_include.match(line)
     if local_match:
         # local include found
-        full_path = os.path.normpath(os.path.join(base_path, local_match.group(1))).replace('\\', '/')
+        full_path = os.path.normpath(os.path.join(base_path, local_match.group(1)))
         return full_path
 
     return None
@@ -147,7 +147,10 @@ if not args.quiet:
 
 
 single_file = 'jsonpp.hpp'
-processed_file = os.path.join(script_path, 'jsonpp', 'parser.hpp')
+files = []
+for f in ('parser.hpp', 'canonical.hpp', 'convert.hpp'):
+    files.append(os.path.join(script_path, 'jsonpp', f))
+
 output_path = '.'
 
 if args.output:
@@ -161,7 +164,9 @@ new_intro = intro.format(time=dt.datetime.utcnow(), revision=revision, version=v
 outro = '#endif // {}\n'.format(include_guard)
 
 with io.StringIO() as ss:
-    process_file(processed_file, ss)
+    for f in files:
+        process_file(f, ss)
+
     result = ss.getvalue()
 
 if args.strip:
