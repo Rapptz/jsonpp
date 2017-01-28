@@ -5,11 +5,7 @@ import os, sys
 import re
 import datetime as dt
 
-# python 3 compatibility
-try:
-    import cStringIO as sstream
-except ImportError:
-    import io as sstream
+import io
 
 description = "Converts jsonpp to a single file for convenience."
 
@@ -17,6 +13,7 @@ description = "Converts jsonpp to a single file for convenience."
 parser = argparse.ArgumentParser(usage='%(prog)s [options...]', description=description)
 parser.add_argument('--output', '-o', help='output directory to place file in', metavar='dir')
 parser.add_argument('--quiet', help='suppress all output', action='store_true')
+parser.add_argument('--strip', '-s', help='strip all doc comments from output', action='store_true')
 args = parser.parse_args()
 
 script_path = os.path.dirname(os.path.realpath(__file__))
@@ -93,10 +90,12 @@ def process_file(filename, out):
     if not args.quiet:
         print('processing {}'.format(filename))
 
-    out.write('// beginning of {}\n\n'.format(filename))
+    if not args.strip:
+        out.write('// beginning of {}\n\n'.format(filename))
+
     empty_line_state = True
 
-    with open(filename, 'r') as f:
+    with io.open(filename, 'r', encoding='utf-8') as f:
         for line in f:
             # skip comments
             if line.startswith('//'):
@@ -134,7 +133,8 @@ def process_file(filename, out):
             # line is fine
             out.write(line)
 
-    out.write('// end of {}\n\n'.format(filename))
+    if not args.strip:
+        out.write('// end of {}\n\n'.format(filename))
 
 
 version = get_version()
@@ -143,7 +143,7 @@ include_guard = 'JSONPP_SINGLE_INCLUDE_HPP'
 
 if not args.quiet:
     print('Creating single header for jsonpp')
-    print('Current version: {version} (revision {revision})\n'.format(version = version, revision = revision))
+    print('Current version: {version} (revision {revision})\n'.format(version=version, revision=revision))
 
 
 single_file = 'jsonpp.hpp'
@@ -157,15 +157,18 @@ if args.output:
 
 output_file = os.path.join(output_path, single_file)
 
-result = ''
+new_intro = intro.format(time=dt.datetime.utcnow(), revision=revision, version=version, guard=include_guard)
+outro = '#endif // {}\n'.format(include_guard)
 
-ss = sstream.StringIO()
-ss.write(intro.format(time=dt.datetime.utcnow(), revision=revision, version=version, guard=include_guard))
-process_file(processed_file, ss)
-ss.write('#endif // {}\n'.format(include_guard))
-result = ss.getvalue()
-ss.close()
+with io.StringIO() as ss:
+    process_file(processed_file, ss)
+    result = ss.getvalue()
 
-with open(output_file, 'w') as f:
+if args.strip:
+    result = re.sub(r'\/\*\*.*?\*\/', '', result, flags=re.DOTALL)
+
+result = new_intro + result + outro
+
+with io.open(output_file, 'w', encoding='utf-8') as f:
     f.write(result)
 
