@@ -9,7 +9,7 @@ import datetime as dt
 try:
     import cStringIO as sstream
 except ImportError:
-    import io.StringIO as sstream
+    import io as sstream
 
 description = "Converts jsonpp to a single file for convenience."
 
