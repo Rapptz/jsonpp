@@ -234,7 +234,7 @@ inline OStream& dump(OStream& out, const T& t, format_options opt = {}) {
     out << '{';
 
     using std::begin;
-    using std::endl;
+    using std::end;
 
     auto&& first = begin(t);
     auto&& last  = end(t);
