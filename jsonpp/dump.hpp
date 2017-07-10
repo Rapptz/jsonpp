@@ -115,9 +115,6 @@ inline bool escape_control(OStream& out, char control) {
     case '\\':
         out << "\\\\";
         return true;
-    case '/':
-        out << "\\/";
-        return true;
     case '\b':
         out << "\\b";
         return true;
